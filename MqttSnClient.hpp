@@ -21,20 +21,19 @@ class MqttSnClient
 {
    public:
 
-      class I_Listener {
-         public:
-            virtual ~I_Listener() {}
-            virtual void messageArrived(const char* iTopic, const uint8_t* iData, size_t iSize) = 0;
-      };
+      typedef void (*Callback)(const char* iTopic, const char* iData);
+
 
       enum { MAX_LENGTH_CLIENT_ID = 23 };
       enum { MAX_LENGTH_TOPIC_NAME = I_RfPacketSocket::PAYLOAD_CAPACITY - 7 };
       enum { MAX_LENGTH_DATA = I_RfPacketSocket::PAYLOAD_CAPACITY - 7 };
 
-      MqttSnClient(I_RfPacketSocket& iSocket, uint8_t iGatewayNodeId, const char* iClientId);
-      ~MqttSnClient();
+      MqttSnClient(I_RfPacketSocket& iSocket,
+                   uint8_t iGatewayNodeId,
+                   const char* iClientId,
+                   Callback iCallback = 0);
 
-      void setListener(I_Listener& iListener) { mListener = &iListener;}
+      ~MqttSnClient();
 
       void loop();
 
@@ -44,7 +43,7 @@ class MqttSnClient
       bool registerTopic(const char* iTopic);
       bool publish(const char* iTopic, const char* iMessage, bool iRetain = false);
       bool publish(const char* iTopic, const uint8_t* iData, size_t iSize, bool iRetain = false);
-
+      bool subscribe(const char* iTopic);
 
 
 
@@ -148,7 +147,7 @@ class MqttSnClient
       char mClientId[MAX_LENGTH_CLIENT_ID + 1];
       Topics mTopics;
       uint16_t mMsgIdCounter;
-      I_Listener* mListener;
+      Callback mCallback;
 
 };
 

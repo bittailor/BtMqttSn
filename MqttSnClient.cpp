@@ -134,6 +134,14 @@ struct Register {
          memcpy(topicName, iTopicName, strlen(iTopicName));
       }
 
+      uint16_t getTopicId() {
+         return bswap(topicId);
+      }
+
+      uint16_t getMsgId() {
+         return bswap(msgId);
+      }
+
 };
 
 struct Regack {
@@ -141,6 +149,14 @@ struct Regack {
       uint16_t topicId;
       uint16_t msgId;
       uint8_t returnCode;
+
+      void initialize(uint16_t iTopicId, uint16_t iMsgId, ReturnCode iReturnCode) {
+         header.length = sizeof(Regack);
+         header.msgType = REGACK;
+         topicId = bswap(iTopicId);
+         msgId = bswap(iMsgId);
+         returnCode = iReturnCode;
+      }
 
       uint16_t getTopicId() {
          return bswap(topicId);
@@ -186,6 +202,45 @@ struct Publish {
 
 };
 
+struct Subscribe {
+      Header header;
+      Flags flags;
+      uint16_t msgId;
+      union {
+         char topicName[0];
+         uint16_t topicId;
+      };
+
+      void initialize(uint16_t iMsgId, const char* iTopicName) {
+         header.length = sizeof(Header) + sizeof(Flags) + sizeof(uint16_t) + strlen(iTopicName);
+         header.msgType = SUBSCRIBE;
+         flags.bits.dup = false;
+         flags.bits.qos = 0;
+         flags.bits.retain = false; // not used by Subscribe
+         flags.bits.will = false; // not used by Subscribe
+         flags.bits.cleanSession = false; // not used by Subscribe
+         flags.bits.topicIdType = 0x0; //TODO (BT) currently only supporting TopicName, implement support for other topic types
+         msgId = bswap(iMsgId);
+         memcpy(topicName, iTopicName, strlen(iTopicName));
+      }
+};
+
+struct Suback {
+      Header header;
+      Flags flags;
+      uint16_t topicId;
+      uint16_t msgId;
+      uint8_t returnCode;
+
+      uint16_t getTopicId() {
+         return bswap(topicId);
+      }
+
+      uint16_t getMsgId() {
+         return bswap(msgId);
+      }
+};
+
 struct Disconnect {
       Header header;
       uint16_t duration;
@@ -213,8 +268,11 @@ struct Disconnect {
 
 //-------------------------------------------------------------------------------------------------
 
-MqttSnClient::MqttSnClient(I_RfPacketSocket& iSocket, uint8_t iGatewayNodeId, const char* iClientId)
-: mSocket(&iSocket), mGatewayNodeId(iGatewayNodeId), mMsgIdCounter(0), mListener(0) {
+MqttSnClient::MqttSnClient(I_RfPacketSocket& iSocket,
+                           uint8_t iGatewayNodeId,
+                           const char* iClientId,
+                           Callback iCallback)
+: mSocket(&iSocket), mGatewayNodeId(iGatewayNodeId), mMsgIdCounter(0), mCallback(iCallback) {
    strncpy(mClientId, iClientId, MAX_LENGTH_CLIENT_ID);
 
 }
@@ -228,7 +286,7 @@ MqttSnClient::~MqttSnClient() {
 //-------------------------------------------------------------------------------------------------
 
 bool MqttSnClient::connect() {
-   uint8_t buffer[I_RfPacketSocket::PAYLOAD_CAPACITY] = {0};
+   uint8_t buffer[I_RfPacketSocket::PAYLOAD_CAPACITY+1] = {0};
 
    Connect* connect = reinterpret_cast<Connect*>(buffer);
    connect->initialize(mClientId);
@@ -254,7 +312,7 @@ bool MqttSnClient::connect() {
 //-------------------------------------------------------------------------------------------------
 
 bool MqttSnClient::disconnect() {
-   uint8_t buffer[I_RfPacketSocket::PAYLOAD_CAPACITY] = {0};
+   uint8_t buffer[I_RfPacketSocket::PAYLOAD_CAPACITY+1] = {0};
 
    Disconnect* message = reinterpret_cast<Disconnect*>(buffer);
    message->initialize();
@@ -277,7 +335,7 @@ bool MqttSnClient::registerTopic(const char* iTopic) {
       BT_LOG_MESSAGE("topic name too long");
       return false;
    }
-   uint8_t buffer[I_RfPacketSocket::PAYLOAD_CAPACITY] = {0};
+   uint8_t buffer[I_RfPacketSocket::PAYLOAD_CAPACITY+1] = {0};
    uint16_t msgId = mMsgIdCounter++;
 
    Register* message = reinterpret_cast<Register*>(buffer);
@@ -340,7 +398,7 @@ bool MqttSnClient::publish(const char* iTopic,const uint8_t* iData, size_t iSize
       }
    }
 
-   uint8_t buffer[I_RfPacketSocket::PAYLOAD_CAPACITY] = {0};
+   uint8_t buffer[I_RfPacketSocket::PAYLOAD_CAPACITY+1] = {0};
    Publish* message = reinterpret_cast<Publish*>(buffer);
    message->initialize(iRetain, topic->id(), iData, iSize);
    if (!mSocket->send(buffer, message->header.length, mGatewayNodeId))
@@ -354,8 +412,54 @@ bool MqttSnClient::publish(const char* iTopic,const uint8_t* iData, size_t iSize
 
 //-------------------------------------------------------------------------------------------------
 
+bool MqttSnClient::subscribe(const char* iTopic) {
+   if (strlen(iTopic) > MAX_LENGTH_TOPIC_NAME) {
+      BT_LOG_MESSAGE("topic name too long");
+      return false;
+   }
+
+   uint8_t buffer[I_RfPacketSocket::PAYLOAD_CAPACITY+1] = {0};
+   uint16_t msgId = mMsgIdCounter++;
+
+   Subscribe* message = reinterpret_cast<Subscribe*>(buffer);
+   message->initialize(msgId, iTopic);
+   if (!mSocket->send(buffer, message->header.length, mGatewayNodeId))
+   {
+      BT_LOG_MESSAGE("send Subscribe failed");
+      return false;
+   }
+
+   pollLoop(buffer, SUBACK);
+
+   Suback* suback = reinterpret_cast<Suback*>(buffer);
+   if (suback->getMsgId() != msgId) {
+      BT_LOG_MESSAGE("Suback msgId mismatch");
+      return false;
+   }
+
+   if (suback->returnCode != ACCEPTED) {
+      BT_LOG_MESSAGE_AND_PARAMETER("subscribe failed with :", suback->returnCode);
+      return false;
+   }
+
+   if (suback->getTopicId() != 0x0000) {
+      if (!mTopics.add(suback->getTopicId(), iTopic)) {
+         BT_LOG_MESSAGE_AND_PARAMETER("failed adding topic id :", suback->getTopicId());
+         return false;
+      }
+   }
+
+   BT_LOG_MESSAGE("topic subscribed:");
+   BT_LOG_MESSAGE_AND_PARAMETER("   id    :",suback->getTopicId());
+   BT_LOG_MESSAGE_AND_PARAMETER("   topic :",iTopic);
+
+   return true;
+}
+
+//-------------------------------------------------------------------------------------------------
+
 void MqttSnClient::loop() {
-   uint8_t buffer[I_RfPacketSocket::PAYLOAD_CAPACITY] = {0};
+   uint8_t buffer[I_RfPacketSocket::PAYLOAD_CAPACITY+1] = {0};
    if(!handleLoop(buffer, PUBLISH)) {
       return;
    }
@@ -435,8 +539,8 @@ void MqttSnClient::handleInternal(uint8_t* iBuffer) {
 //-------------------------------------------------------------------------------------------------
 
 void MqttSnClient::handlePublish(uint8_t* iBuffer) {
-   if (mListener == 0) {
-      BT_LOG_MESSAGE("no listener drop message");
+   if (mCallback == 0) {
+      BT_LOG_MESSAGE("no callback set => drop message");
       return;
    }
 
@@ -444,15 +548,35 @@ void MqttSnClient::handlePublish(uint8_t* iBuffer) {
    const Topic* topic = mTopics.findTopic(message->getTopicId());
    if (topic == 0) {
       BT_LOG_MESSAGE_AND_PARAMETER("topic id not found: ", message->getTopicId());
+      mCallback("?", reinterpret_cast<char*>(message->data));
+      return;
    }
 
-   mListener->messageArrived(topic->name(), message->data, message->header.length - sizeof(Publish));
+   mCallback(topic->name(), reinterpret_cast<char*>(message->data));
 }
 
 //-------------------------------------------------------------------------------------------------
 
 void MqttSnClient::handleRegister(uint8_t* iBuffer) {
+   Register* message = reinterpret_cast<Register*>(iBuffer);
+   BT_LOG_MESSAGE("register topic:");
+   BT_LOG_MESSAGE_AND_PARAMETER("   id:   ", message->getTopicId());
+   BT_LOG_MESSAGE_AND_PARAMETER("   name: ", message->topicName);
 
+   ReturnCode returnCode = ACCEPTED;
+
+   if (!mTopics.add(message->getTopicId(), message->topicName)) {
+      BT_LOG_MESSAGE_AND_PARAMETER("failed adding topic id :", message->getTopicId());
+      returnCode = REJECTED_NOT_SUPPORTED;
+   }
+
+   uint8_t buffer[I_RfPacketSocket::PAYLOAD_CAPACITY+1] = {0};
+   Regack* ack = reinterpret_cast<Regack*>(buffer);
+   ack->initialize(message->getTopicId(), message->getMsgId(), returnCode);
+   if (!mSocket->send(buffer, ack->header.length, mGatewayNodeId))
+   {
+      BT_LOG_MESSAGE("send Regack failed");
+   }
 }
 
 //-------------------------------------------------------------------------------------------------
