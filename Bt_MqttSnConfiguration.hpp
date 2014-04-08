@@ -1,15 +1,15 @@
 //*************************************************************************************************
 //
-//  BITTAILOR.CH - BtMqttSn
+//  BITTAILOR.CH - BtMqttSn , an Arduino library for MQTT-SN over nRF24L01+
 //
 //-------------------------------------------------------------------------------------------------
 //
-//  BtMqttSnConfiguration
+//  Bt::MqttSnConfiguration
 //  
 //*************************************************************************************************
 
-#ifndef INC__BtMqttSnConfiguration__hpp
-#define INC__BtMqttSnConfiguration__hpp
+#ifndef INC__Bt_MqttSnConfiguration__hpp
+#define INC__Bt_MqttSnConfiguration__hpp
 
 #include <avr/pgmspace.h>
 #include "Arduino.h"
@@ -28,4 +28,4 @@
 
 
 
-#endif // INC__BtMqttSnConfiguration__hpp
+#endif // INC__Bt_MqttSnConfiguration__hpp

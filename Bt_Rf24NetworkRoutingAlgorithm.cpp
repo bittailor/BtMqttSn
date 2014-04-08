@@ -1,16 +1,16 @@
 //*************************************************************************************************
 //
-//  BITTAILOR.CH - BtCore
+//  BITTAILOR.CH - BtMqttSn , an Arduino library for MQTT-SN over nRF24L01+
 //
 //-------------------------------------------------------------------------------------------------
 //
-//  Bt::Rf24::RfNetworkRoutingAlgorithm
+//  Bt::Rf24NetworkRoutingAlgorithm
 //  
 //*************************************************************************************************
 
-#include "Rf24NetworkRoutingAlgorithm.hpp"
+#include "Bt_Rf24NetworkRoutingAlgorithm.hpp"
 
-
+namespace Bt {
 
 //-------------------------------------------------------------------------------------------------
 
@@ -76,3 +76,4 @@ bool Rf24NetworkRoutingAlgorithm::isLeafNode(Rf24Node pSelf) {
 
 //-------------------------------------------------------------------------------------------------
 
+} // namespace Bt

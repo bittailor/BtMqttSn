@@ -1,17 +1,19 @@
 //*************************************************************************************************
 //
-//  BITTAILOR.CH - ArduinoCore
+//  BITTAILOR.CH - BtMqttSn , an Arduino library for MQTT-SN over nRF24L01+
 //
 //-------------------------------------------------------------------------------------------------
 //
-//  Bt::Util::StaticArray
+//  Bt::StaticArray
 //  
 //*************************************************************************************************
 
-#ifndef INC__Bt_Util_StaticArray__hpp
-#define INC__Bt_Util_StaticArray__hpp
+#ifndef INC__Bt_StaticArray__hpp
+#define INC__Bt_StaticArray__hpp
 
 #include <stddef.h>
+
+namespace Bt {
 
 template<typename T, size_t SIZE>
 class StaticArray {
@@ -74,4 +76,6 @@ class StaticArray {
 
 };
 
-#endif // INC__Bt_Util_StaticArray__hpp
+} // namespace Bt
+
+#endif // INC__Bt_StaticArray__hpp

@@ -1,17 +1,19 @@
 //*************************************************************************************************
 //
-//  BITTAILOR.CH - BtCore
+//  BITTAILOR.CH - BtMqttSn , an Arduino library for MQTT-SN over nRF24L01+
 //
 //-------------------------------------------------------------------------------------------------
 //
-//  Bt::Rf24::RfNode
+//  Bt::RfNode
 //  
 //*************************************************************************************************
 
-#ifndef INC__Bt_Rf24_RfNode__hpp
-#define INC__Bt_Rf24_RfNode__hpp
+#ifndef INC__Bt_Rf24Node__hpp
+#define INC__Bt_Rf24Node__hpp
 
 #include <stdint.h>
+
+namespace Bt {
 
 class Rf24Node 
 {
@@ -28,4 +30,6 @@ class Rf24Node
       uint8_t mLevel;
 };
 
-#endif // INC__Bt_Rf24_RfNode__hpp
+} // namespace Bt
+
+#endif // INC__Bt_Rf24Node__hpp

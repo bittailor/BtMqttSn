@@ -1,20 +1,22 @@
 //*************************************************************************************************
 //
-//  BITTAILOR.CH - BtCore
+//  BITTAILOR.CH - BtMqttSn , an Arduino library for MQTT-SN over nRF24L01+
 //
 //-------------------------------------------------------------------------------------------------
 //
-//  Bt::Rf24::Rf24PacketSocket
+//  Bt::Rf24PacketSocket
 //  
 //*************************************************************************************************
 
-#include "Rf24PacketSocket.hpp"
+#include "Bt_Rf24PacketSocket.hpp"
 
-#include "BtMqttSnConfiguration.hpp"
+#include "Bt_MqttSnConfiguration.hpp"
 
 
 #define JOIN( X, Y ) JOIN2(X,Y)
 #define JOIN2( X, Y ) X##Y
+
+
 
 namespace StaticAssert
 {
@@ -30,7 +32,9 @@ namespace StaticAssert
             JOIN(_static_assert_typedef, __LINE__)
 
 
-COMPILE_ASSERT(static_cast<size_t>(I_RfPacketSocket::PAYLOAD_CAPACITY) == static_cast<size_t>(Rf24PacketSocket::IMPL_PAYLOAD_CAPACITY));
+COMPILE_ASSERT(static_cast<size_t>(Bt::I_RfPacketSocket::PAYLOAD_CAPACITY) == static_cast<size_t>(Bt::Rf24PacketSocket::IMPL_PAYLOAD_CAPACITY));
+
+namespace Bt {
 
 //-------------------------------------------------------------------------------------------------
 
@@ -85,3 +89,4 @@ bool Rf24PacketSocket::available(){
 
 //-------------------------------------------------------------------------------------------------
 
+} // namespace Bt

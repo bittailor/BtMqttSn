@@ -1,19 +1,19 @@
 //*************************************************************************************************
 //
-//  BITTAILOR.CH - BtCore
+//  BITTAILOR.CH - BtMqttSn , an Arduino library for MQTT-SN over nRF24L01+
 //
 //-------------------------------------------------------------------------------------------------
 //
-//  Bt::Mcu::Spi
+//  Bt::Spi
 //  
 //*************************************************************************************************
 
-#ifndef INC__Bt_Mcu_Spi__hpp
-#define INC__Bt_Mcu_Spi__hpp
+#ifndef INC__Bt_Spi__hpp
+#define INC__Bt_Spi__hpp
 
-#include "Pin.hpp"
+#include "Bt_Pin.hpp"
 
-
+namespace Bt {
 
 class Spi
 {
@@ -39,5 +39,6 @@ class Spi
       Pin* mChipSelectPin;
 };
 
+} // namespace Bt
 
-#endif // INC__Bt_Mcu_Spi__hpp
+#endif // INC__Bt_Spi__hpp

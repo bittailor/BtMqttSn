@@ -1,15 +1,17 @@
 //*************************************************************************************************
 //
-//  BITTAILOR.CH - BtMqttSn
+//  BITTAILOR.CH - BtMqttSn , an Arduino library for MQTT-SN over nRF24L01+
 //
 //-------------------------------------------------------------------------------------------------
 //
-//  StaticRingBuffer
+//  Bt::StaticRingBuffer
 //  
 //*************************************************************************************************
 
-#ifndef INC__StaticRingBuffer__hpp
-#define INC__StaticRingBuffer__hpp
+#ifndef INC__Bt_StaticRingBuffer__hpp
+#define INC__Bt_StaticRingBuffer__hpp
+
+namespace Bt {
 
 template <typename T, size_t N>
 class StaticRingBuffer {
@@ -52,5 +54,6 @@ class StaticRingBuffer {
       size_t mEnd;
 };
 
+} // namespace Bt
 
-#endif // INC__StaticRingBuffer__hpp
+#endif // INC__Bt_StaticRingBuffer__hpp

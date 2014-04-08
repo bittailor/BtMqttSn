@@ -1,15 +1,16 @@
 //*************************************************************************************************
 //
-//  BITTAILOR.CH - BtMqttSn
+//  BITTAILOR.CH - BtMqttSn , an Arduino library for MQTT-SN over nRF24L01+
 //
 //-------------------------------------------------------------------------------------------------
 //
-//  MqttSnClient
+//  Bt::MqttSnClient
 //  
 //*************************************************************************************************
 
-#include "MqttSnClient.hpp"
-#include "BtMqttSnConfiguration.hpp"
+#include "Bt_MqttSnClient.hpp"
+
+#include "Bt_MqttSnConfiguration.hpp"
 
 #include <stdio.h>
 #include <string.h>
@@ -264,7 +265,7 @@ struct Disconnect {
 } // namespace
 
 
-
+namespace Bt {
 
 //-------------------------------------------------------------------------------------------------
 
@@ -581,3 +582,4 @@ void MqttSnClient::handleRegister(uint8_t* iBuffer) {
 
 //-------------------------------------------------------------------------------------------------
 
+} // namespace Bt

@@ -1,17 +1,17 @@
 //*************************************************************************************************
 //
-//  BITTAILOR.CH - BtCore
+//  BITTAILOR.CH - BtMqttSn , an Arduino library for MQTT-SN over nRF24L01+
 //
 //-------------------------------------------------------------------------------------------------
 //
-//  Rf24Pipe
+//  Bt::Rf24Pipe
 //  
 //*************************************************************************************************
 
-#ifndef INC__Rf24Pipe__hpp
-#define INC__Rf24Pipe__hpp
+#ifndef INC__BT_Rf24Pipe__hpp
+#define INC__BT_Rf24Pipe__hpp
 
-
+namespace Bt {
 
 class Rf24Pipes {
    public:
@@ -31,4 +31,6 @@ class Rf24Pipes {
       static Rf24Pipe ALL_PIPES[NUMBER_OF_PIPES];
 };
 
-#endif // INC__Rf24Pipe__hpp
+} // namespace Bt
+
+#endif // INC__BT_Rf24Pipe__hpp

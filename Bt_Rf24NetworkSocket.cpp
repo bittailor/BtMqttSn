@@ -1,19 +1,20 @@
 //*************************************************************************************************
 //
-//  BITTAILOR.CH - BtCore
+//  BITTAILOR.CH - BtMqttSn , an Arduino library for MQTT-SN over nRF24L01+
 //
 //-------------------------------------------------------------------------------------------------
 //
-//  Bt::Rf24::Rf24NetworkSocket
+//  Bt::Rf24NetworkSocket
 //  
 //*************************************************************************************************
 
 #include <stdio.h>
 #include <string.h>
 
-#include "BtMqttSnConfiguration.hpp"
-#include "Rf24NetworkSocket.hpp"
+#include "Bt_MqttSnConfiguration.hpp"
+#include "Bt_Rf24NetworkSocket.hpp"
 
+namespace Bt {
 
 //-------------------------------------------------------------------------------------------------
 
@@ -31,7 +32,6 @@ Rf24NetworkSocket::Rf24NetworkSocket(Rf24Node pNodeId, Rf24Controller& pControll
    mController->startListening();
 
 }
-
 
 //-------------------------------------------------------------------------------------------------
 
@@ -110,3 +110,4 @@ void Rf24NetworkSocket::receiveInternal(Packet& pPacket) {
 
 //-------------------------------------------------------------------------------------------------
 
+} // namespace Bt

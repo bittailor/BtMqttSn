@@ -1,17 +1,19 @@
 //*************************************************************************************************
 //
-//  BITTAILOR.CH - BtCore
+//  BITTAILOR.CH - BtMqttSn , an Arduino library for MQTT-SN over nRF24L01+
 //
 //-------------------------------------------------------------------------------------------------
 //
-//  Bt::Rf24::Rf24Address
+//  Bt::Rf24Address
 //  
 //*************************************************************************************************
 
-#ifndef INC__Bt_Rf24_Rf24Address__hpp
-#define INC__Bt_Rf24_Rf24Address__hpp
+#ifndef INC__Bt_Rf24Address__hpp
+#define INC__Bt_Rf24Address__hpp
 
-#include "StaticArray.hpp"
+#include "Bt_StaticArray.hpp"
+
+namespace Bt {
 
 class Rf24Address {
    public:
@@ -37,4 +39,6 @@ class Rf24Address {
       StaticArray<uint8_t,5> mRaw;
 };
 
-#endif // INC__Bt_Rf24_Rf24Address__hpp
+} // namespace Bt
+
+#endif // INC__Bt_Rf24Address__hpp

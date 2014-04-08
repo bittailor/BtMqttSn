@@ -1,19 +1,21 @@
 //*************************************************************************************************
 //
-//  BITTAILOR.CH - BtCore
-//  BITTAILOR.CH - BtCore
+//  BITTAILOR.CH - BtMqttSn , an Arduino library for MQTT-SN over nRF24L01+
 //
 //-------------------------------------------------------------------------------------------------
 //
-//  Bt::Rf24::Rf24Device
+//  Bt::Rf24Device
 //  
 //*************************************************************************************************
 
-#include "Rf24Device.hpp"
+#include "Bt_Rf24Device.hpp"
 
 #include <Arduino.h>
 #include <stdint.h>
 #include <stdio.h>
+
+
+namespace Bt {
 
 namespace {
 
@@ -163,7 +165,6 @@ uint8_t writeRegister(Spi& pSpi, FiveByteRegister pRegister, StaticArray<uint8_t
 //-------------------------------------------------------------------------------------------------
 
 } // namespace
-
 
 //-------------------------------------------------------------------------------------------------
 
@@ -600,3 +601,4 @@ void Rf24Device::dynamicPayloadEnabled(Rf24Pipes::Rf24Pipe pPipe, bool pValue) {
 
 //-------------------------------------------------------------------------------------------------
 
+} // namespace Bt

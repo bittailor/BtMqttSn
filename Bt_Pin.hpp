@@ -1,17 +1,19 @@
 //*************************************************************************************************
 //
-//  BITTAILOR.CH - BtCore
+//  BITTAILOR.CH - BtMqttSn , an Arduino library for MQTT-SN over nRF24L01+
 //
 //-------------------------------------------------------------------------------------------------
 //
-//  Bt::Mcu::Pin
+//  Bt::Pin
 //  
 //*************************************************************************************************
 
-#ifndef INC__Bt_Mcu_Pin__hpp
-#define INC__Bt_Mcu_Pin__hpp
+#ifndef INC__Bt_Pin__hpp
+#define INC__Bt_Pin__hpp
 
 #include <stdint.h>
+
+namespace Bt {
 
 class Pin
 {
@@ -41,5 +43,6 @@ class Pin
       const uint8_t mPinId;
 };
 
+} // namespace Bt
 
-#endif // INC__Bt_Mcu_Pin__hpp
+#endif // INC__Bt_Pin__hpp
