@@ -14,7 +14,7 @@
 #include <avr/pgmspace.h>
 #include "Arduino.h"
 
-#define BTMQTTSN_MAX_NUMBER_OF_REGISTERED_TOPICS 20
+#define BT_MQTTSN_MAX_NUMBER_OF_REGISTERED_TOPICS 20
 
 
 #define BT_PROGMEM __attribute__(( section(".progmem.data") ))

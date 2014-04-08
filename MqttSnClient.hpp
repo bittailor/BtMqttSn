@@ -95,7 +95,7 @@ class MqttSnClient
             }
 
             const Topic* findTopic(const char* iName) {
-               for (size_t i = 0 ; i < BTMQTTSN_MAX_NUMBER_OF_REGISTERED_TOPICS ; i++) {
+               for (size_t i = 0 ; i < BT_MQTTSN_MAX_NUMBER_OF_REGISTERED_TOPICS ; i++) {
                   if(mTopics[i].isRegistred() && mTopics[i].matches(iName) ) {
                      return &mTopics[i];
                   }
@@ -104,7 +104,7 @@ class MqttSnClient
             }
 
             const Topic* findTopic(uint16_t iId) {
-               for (size_t i = 0 ; i < BTMQTTSN_MAX_NUMBER_OF_REGISTERED_TOPICS ; i++) {
+               for (size_t i = 0 ; i < BT_MQTTSN_MAX_NUMBER_OF_REGISTERED_TOPICS ; i++) {
                   if(mTopics[i].isRegistred() && mTopics[i].matches(iId) ) {
                      return &mTopics[i];
                   }
@@ -115,7 +115,7 @@ class MqttSnClient
 
          private:
             Topic* nextFree() {
-               for (size_t i = 0 ; i < BTMQTTSN_MAX_NUMBER_OF_REGISTERED_TOPICS ; i++) {
+               for (size_t i = 0 ; i < BT_MQTTSN_MAX_NUMBER_OF_REGISTERED_TOPICS ; i++) {
                   if(!mTopics[i].isRegistred()) {
                      return &mTopics[i];
                   }
@@ -123,7 +123,7 @@ class MqttSnClient
                return 0;
             }
 
-            Topic mTopics[BTMQTTSN_MAX_NUMBER_OF_REGISTERED_TOPICS];
+            Topic mTopics[BT_MQTTSN_MAX_NUMBER_OF_REGISTERED_TOPICS];
       };
 
 
