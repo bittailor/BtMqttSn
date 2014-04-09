@@ -1,6 +1,6 @@
 //*************************************************************************************************
 //
-//  BITTAILOR.CH - BtMqttSn , an Arduino library for MQTT-SN over nRF24L01+
+//  BITTAILOR.CH - BtMqttSn, an Arduino library for MQTT-SN over nRF24L01+
 //
 //-------------------------------------------------------------------------------------------------
 //
@@ -12,6 +12,7 @@
 #define INC__MqttSnClient__hpp
 
 #include "Bt_MqttSnClient.hpp"
+#include "Bt_PlacementPointer.hpp"
 #include "Bt_Rf24PacketSocket.hpp"
 
 
@@ -20,14 +21,15 @@ class MqttSnClient
    public:
       typedef Bt::MqttSnClient::Callback Callback;
 
-      MqttSnClient(uint8_t iChipEnable, uint8_t iChipSelect,
-                   uint8_t iClientNodeId,  uint8_t iGatewayNodeId,
-                   const char* iClientId, Callback iCallback = 0);
+      MqttSnClient();
       ~MqttSnClient();
    
 
-      void begin();
+      void begin(uint8_t iChipEnable, uint8_t iChipSelect,
+                 uint8_t iClientNodeId,  uint8_t iGatewayNodeId,
+                 const char* iClientId, Callback iCallback = 0);
       void loop();
+      void end();
 
       bool connect();
       bool disconnect();
@@ -44,14 +46,14 @@ class MqttSnClient
       // Operator= to prohibit copy assignment
       MqttSnClient& operator=(const MqttSnClient&);
 
-      Bt::Pin mChipEnable;
-      Bt::Pin mChipSelect;
-      Bt::Spi mSpi;
-      Bt::Rf24Device mDevice;
-      Bt::Rf24Controller mController;
-      Bt::Rf24NetworkSocket mNetworkSocket;
-      Bt::Rf24PacketSocket mPacketSocket;
-      Bt::MqttSnClient mClient;
+      Bt::PlacementPointer<Bt::Pin> mChipEnable;
+      Bt::PlacementPointer<Bt::Pin> mChipSelect;
+      Bt::PlacementPointer<Bt::Spi> mSpi;
+      Bt::PlacementPointer<Bt::Rf24Device> mDevice;
+      Bt::PlacementPointer<Bt::Rf24Controller> mController;
+      Bt::PlacementPointer<Bt::Rf24NetworkSocket> mNetworkSocket;
+      Bt::PlacementPointer<Bt::Rf24PacketSocket> mPacketSocket;
+      Bt::PlacementPointer<Bt::MqttSnClient> mClient;
 
 };
 
@@ -60,37 +62,37 @@ class MqttSnClient
 //-------------------------------------------------------------------------------------------------
 
 inline void MqttSnClient::loop() {
-   mClient.loop();
+   mClient->loop();
 }
 
 //-------------------------------------------------------------------------------------------------
 
 inline bool MqttSnClient::connect() {
-   return mClient.connect();
+   return mClient->connect();
 }
 
 //-------------------------------------------------------------------------------------------------
 
 inline bool MqttSnClient::disconnect() {
-   return mClient.disconnect();
+   return mClient->disconnect();
 }
 
 //-------------------------------------------------------------------------------------------------
 
 inline bool MqttSnClient::registerTopic(const char* iTopic) {
-   return mClient.registerTopic(iTopic);
+   return mClient->registerTopic(iTopic);
 }
 
 //-------------------------------------------------------------------------------------------------
 
 inline bool MqttSnClient::publish(const char* iTopic, const char* iMessage, bool iRetain) {
-   return mClient.publish(iTopic, iMessage, iRetain);
+   return mClient->publish(iTopic, iMessage, iRetain);
 }
 
 //-------------------------------------------------------------------------------------------------
 
 inline bool MqttSnClient::subscribe(const char* iTopic) {
-   return mClient.subscribe(iTopic);
+   return mClient->subscribe(iTopic);
 }
 
 //-------------------------------------------------------------------------------------------------

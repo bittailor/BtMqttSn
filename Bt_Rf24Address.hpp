@@ -1,6 +1,6 @@
 //*************************************************************************************************
 //
-//  BITTAILOR.CH - BtMqttSn , an Arduino library for MQTT-SN over nRF24L01+
+//  BITTAILOR.CH - BtMqttSn, an Arduino library for MQTT-SN over nRF24L01+
 //
 //-------------------------------------------------------------------------------------------------
 //
