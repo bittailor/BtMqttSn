@@ -21,7 +21,8 @@ namespace Bt {
 Rf24NetworkSocket::Rf24NetworkSocket(Rf24Node pNodeId, Rf24Controller& pController)
 : mNodeId(pNodeId), mController(&pController), mIdCounter(0) {
 
-   Rf24Controller::Configuration configuration;
+   uint8_t autoRetransmitDelay = ((mNodeId.id() % 6) * 2) + 5;
+   Rf24Controller::Configuration configuration(autoRetransmitDelay);
 
    for(size_t i = 0; i < Rf24Pipes::NUMBER_OF_PIPES; i++) {
       Rf24Pipes::Rf24Pipe pipe = Rf24Pipes::ALL_PIPES[i];

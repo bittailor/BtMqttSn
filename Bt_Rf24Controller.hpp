@@ -31,12 +31,22 @@ class Rf24Controller
                Rf24Address mAddress;
             };
 
+            Configuration(uint8_t iAutoRetransmitDelay = 0x6) : mAutoRetransmitDelay(iAutoRetransmitDelay) {
+
+            }
+
+            uint8_t autoRetransmitDelay() const {
+               return mAutoRetransmitDelay;
+            }
+
+
             PipeConfiguration& operator[](Rf24Pipes::Rf24Pipe pPipe) {
                return mPipeConfigurations[static_cast<size_t>(pPipe)];
             }
 
          private:
             StaticArray<PipeConfiguration,Rf24Pipes::NUMBER_OF_PIPES> mPipeConfigurations;
+            uint8_t mAutoRetransmitDelay;
       };
 
       class Packet {
