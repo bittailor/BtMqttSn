@@ -91,7 +91,7 @@ struct Connect {
       uint16_t duration;
       char clientId[0];
 
-      void initialize(const char* pClientId) {
+      void initialize(const char* pClientId, uint16_t iKeepAliveTimerDuration) {
          header.length = sizeof(Connect) + strlen(pClientId);
          header.msgType = CONNECT;
          flags.bits.dup = false;
@@ -101,7 +101,7 @@ struct Connect {
          flags.bits.cleanSession = true;
          flags.bits.topicIdType = 0;
          protocolId = PROTOCOL_ID_1_2;
-         duration = 0xFFFF; //TODO (BT) implement support duration of Keep Alive timer
+         duration = bswap(iKeepAliveTimerDuration);
          memcpy(clientId, pClientId, strlen(pClientId));
 
       }
@@ -260,6 +260,23 @@ struct Disconnect {
       }
 };
 
+struct Pingreq {
+      Header header;
+
+      void initialize() {
+         header.length = 2;
+         header.msgType = PINGREQ;
+      }
+};
+
+struct Pingresp {
+      Header header;
+
+      void initialize() {
+         header.length = 2;
+         header.msgType = PINGRESP;
+      }
+};
 
 
 } // namespace
@@ -273,7 +290,8 @@ MqttSnClient::MqttSnClient(I_RfPacketSocket& iSocket,
                            uint8_t iGatewayNodeId,
                            const char* iClientId,
                            Callback iCallback)
-: mSocket(&iSocket), mGatewayNodeId(iGatewayNodeId), mMsgIdCounter(0), mCallback(iCallback) {
+: mSocket(&iSocket), mGatewayNodeId(iGatewayNodeId), mMsgIdCounter(0), mCallback(iCallback)
+, mKeepAliveTimerDuration(0), mKeepAliveTimerLastSend(millis()) {
    strncpy(mClientId, iClientId, MAX_LENGTH_CLIENT_ID);
 
 }
@@ -286,12 +304,14 @@ MqttSnClient::~MqttSnClient() {
 
 //-------------------------------------------------------------------------------------------------
 
-bool MqttSnClient::connect() {
+bool MqttSnClient::connect(uint16_t iKeepAliveTimerDuration) {
+   mKeepAliveTimerDuration = iKeepAliveTimerDuration * 1000;
+
    uint8_t buffer[I_RfPacketSocket::PAYLOAD_CAPACITY+1] = {0};
 
    Connect* connect = reinterpret_cast<Connect*>(buffer);
-   connect->initialize(mClientId);
-   if (!mSocket->send(buffer, connect->header.length, mGatewayNodeId))
+   connect->initialize(mClientId, iKeepAliveTimerDuration);
+   if (!send(buffer, connect->header.length))
    {
       BT_LOG_MESSAGE("send Connect failed");
       return false;
@@ -317,7 +337,7 @@ bool MqttSnClient::disconnect() {
 
    Disconnect* message = reinterpret_cast<Disconnect*>(buffer);
    message->initialize();
-   if (!mSocket->send(buffer, message->header.length, mGatewayNodeId))
+   if (!send(buffer, message->header.length))
    {
       BT_LOG_MESSAGE("send Disconnect failed");
       return false;
@@ -341,7 +361,7 @@ bool MqttSnClient::registerTopic(const char* iTopic) {
 
    Register* message = reinterpret_cast<Register*>(buffer);
    message->initialize(msgId, iTopic);
-   if (!mSocket->send(buffer, message->header.length, mGatewayNodeId))
+   if (!send(buffer, message->header.length))
    {
       BT_LOG_MESSAGE("send Register failed");
       return false;
@@ -402,7 +422,7 @@ bool MqttSnClient::publish(const char* iTopic,const uint8_t* iData, size_t iSize
    uint8_t buffer[I_RfPacketSocket::PAYLOAD_CAPACITY+1] = {0};
    Publish* message = reinterpret_cast<Publish*>(buffer);
    message->initialize(iRetain, topic->id(), iData, iSize);
-   if (!mSocket->send(buffer, message->header.length, mGatewayNodeId))
+   if (!send(buffer, message->header.length))
    {
       BT_LOG_MESSAGE("send Publish failed");
       return false;
@@ -424,7 +444,7 @@ bool MqttSnClient::subscribe(const char* iTopic) {
 
    Subscribe* message = reinterpret_cast<Subscribe*>(buffer);
    message->initialize(msgId, iTopic);
-   if (!mSocket->send(buffer, message->header.length, mGatewayNodeId))
+   if (!send(buffer, message->header.length))
    {
       BT_LOG_MESSAGE("send Subscribe failed");
       return false;
@@ -461,10 +481,19 @@ bool MqttSnClient::subscribe(const char* iTopic) {
 
 void MqttSnClient::loop() {
    uint8_t buffer[I_RfPacketSocket::PAYLOAD_CAPACITY+1] = {0};
-   if(!handleLoop(buffer, PUBLISH)) {
-      return;
+   if(handleLoop(buffer, PUBLISH)) {
+      handlePublish(buffer);
    }
-   handlePublish(buffer);
+
+   unsigned long timeSinceLastSend = millis() - mKeepAliveTimerLastSend;
+   if(mKeepAliveTimerDuration < timeSinceLastSend) {
+      Pingreq* message = reinterpret_cast<Pingreq*>(buffer);
+      message->initialize();
+      if (!send(buffer, message->header.length))
+      {
+         BT_LOG_MESSAGE("send Pingreq failed");
+      }
+   }
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -532,8 +561,8 @@ void MqttSnClient::handleInternal(uint8_t* iBuffer) {
    switch(header->msgType) {
       case PUBLISH   : handlePublish(iBuffer);     break;
       case REGISTER  : handleRegister(iBuffer);    break;
-
-
+      case PINGREQ   : handlePingRequest(iBuffer);    break;
+      case PINGRESP  : handlePingResponse(iBuffer);    break;
    }
 }
 
@@ -574,10 +603,35 @@ void MqttSnClient::handleRegister(uint8_t* iBuffer) {
    uint8_t buffer[I_RfPacketSocket::PAYLOAD_CAPACITY+1] = {0};
    Regack* ack = reinterpret_cast<Regack*>(buffer);
    ack->initialize(message->getTopicId(), message->getMsgId(), returnCode);
-   if (!mSocket->send(buffer, ack->header.length, mGatewayNodeId))
+   if (!send(buffer, ack->header.length))
    {
       BT_LOG_MESSAGE("send Regack failed");
    }
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void MqttSnClient::handlePingRequest(uint8_t* iBuffer) {
+   uint8_t buffer[I_RfPacketSocket::PAYLOAD_CAPACITY+1] = {0};
+   Pingresp* response = reinterpret_cast<Pingresp*>(buffer);
+   response->initialize();
+   if (!send(buffer, response->header.length))
+   {
+      BT_LOG_MESSAGE("send Pingresp failed");
+   }
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void MqttSnClient::handlePingResponse(uint8_t* iBuffer) {
+   BT_LOG_MESSAGE("handle PingResponse");
+}
+
+//-------------------------------------------------------------------------------------------------
+
+bool MqttSnClient::send(uint8_t* iPayload, size_t iSize) {
+   mKeepAliveTimerLastSend = millis();
+   return mSocket->send(iPayload, iSize, mGatewayNodeId);
 }
 
 //-------------------------------------------------------------------------------------------------

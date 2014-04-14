@@ -39,7 +39,7 @@ class MqttSnClient
 
       void loop();
 
-      bool connect();
+      bool connect(uint16_t iKeepAliveTimerDuration = 60);
       bool disconnect();
 
       bool registerTopic(const char* iTopic);
@@ -143,6 +143,10 @@ class MqttSnClient
       void handleInternal(uint8_t* iBuffer);
       void handlePublish(uint8_t* iBuffer);
       void handleRegister(uint8_t* iBuffer);
+      void handlePingRequest(uint8_t* iBuffer);
+      void handlePingResponse(uint8_t* iBuffer);
+
+      bool send(uint8_t* iPayload, size_t iSize);
 
       I_RfPacketSocket* mSocket;
       uint8_t mGatewayNodeId;
@@ -150,6 +154,8 @@ class MqttSnClient
       Topics mTopics;
       uint16_t mMsgIdCounter;
       Callback mCallback;
+      unsigned long mKeepAliveTimerDuration;
+      unsigned long mKeepAliveTimerLastSend;
 
 };
 
