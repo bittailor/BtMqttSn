@@ -39,7 +39,7 @@ class MqttSnClient
 
       void loop();
 
-      bool connect(uint16_t iKeepAliveTimerDuration = 60);
+      bool connect(uint16_t iKeepAliveTimerDuration);
       bool disconnect();
 
       bool registerTopic(const char* iTopic);

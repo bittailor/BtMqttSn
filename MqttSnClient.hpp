@@ -31,7 +31,7 @@ class MqttSnClient
       void loop();
       void end();
 
-      bool connect();
+      bool connect(uint16_t iKeepAliveTimerDurationInSeconds = 30);
       bool disconnect();
 
       bool registerTopic(const char* iTopic);
@@ -67,8 +67,8 @@ inline void MqttSnClient::loop() {
 
 //-------------------------------------------------------------------------------------------------
 
-inline bool MqttSnClient::connect() {
-   return mClient->connect();
+inline bool MqttSnClient::connect(uint16_t iKeepAliveTimerDurationInSeconds) {
+   return mClient->connect(iKeepAliveTimerDurationInSeconds);
 }
 
 //-------------------------------------------------------------------------------------------------
