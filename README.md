@@ -1,4 +1,9 @@
-BtMqttSn
-========
+#BtMqttSn
 
-Arduino library for a MQTT-SN client communicating over an nRF24L01+ Transceiver.
+Arduino library for a [MQTT-SN][MQTT-SN] client communicating over a [nRF24L01+][nRF24] Transceiver.
+
+
+
+
+[MQTT-SN]: http://mqtt.org/new/wp-content/uploads/2009/06/MQTT-SN_spec_v1.2.pdf "MQTT-SN"
+[nRF24]: http://www.nordicsemi.com/eng/Products/2.4GHz-RF/nRF24L01P "nRF24L01+"
