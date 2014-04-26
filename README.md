@@ -3,7 +3,7 @@
 [Arduino][Arduino] library for a [MQTT-SN][MQTT-SN] *client* communicating over a [nRF24L01+][nRF24] Transceiver.
 
 
-![Alt text](http://bittailor.ch/res/MQTT-SN%20Overview.png)
+![Overview](http://bittailor.ch/res/MQTT-SN%20Overview.png "Overview")
 
 
 ### Links
