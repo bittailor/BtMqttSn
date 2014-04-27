@@ -40,6 +40,25 @@ void Rf24Controller::configure(const Configuration& pConfiguration) {
 //-------------------------------------------------------------------------------------------------
 
 bool Rf24Controller::write(Rf24Pipes::Rf24Pipe pPipe, Packet& pPacket) {
+
+#if BT_LOGGING >= BT_LOG_LEVEL_INFO
+   Serial.print("write: ");
+   for (size_t i = 0 ; i < 3 ; i++) {
+      Serial.print(pPacket.buffer()[i]);
+      Serial.print(",");
+   }
+
+   for (size_t i = 0 ; i < pPacket.size() ; i++) {
+      if(isprint((char) pPacket.buffer()[i])) {
+         Serial.print((char) pPacket.buffer()[i]);
+      } else {
+         Serial.print(pPacket.buffer()[i]);
+      }
+      Serial.print(",");
+   }
+   Serial.println(" end");
+#endif
+
    size_t size = write(pPipe, pPacket.buffer(), pPacket.size());
    return size != 0;
 }
@@ -74,10 +93,10 @@ size_t Rf24Controller::write(Rf24Pipes::Rf24Pipe pPipe, uint8_t* pData, size_t p
 
    if (status.retransmitsExceeded()) {
       mDevice->clearRetransmitsExceeded();
+      mDevice->flushTransmitFifo();
       BT_LOG_WARNING("TxMode::ToStandbyI: send failed retransmits exceeded");
       sentSize = 0;
    }
-
 
    if (timeout) {
       mDevice->clearRetransmitsExceeded();

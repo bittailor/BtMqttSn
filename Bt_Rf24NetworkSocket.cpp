@@ -39,6 +39,7 @@ Rf24NetworkSocket::Rf24NetworkSocket(Rf24Node pNodeId, Rf24Controller& pControll
 bool Rf24NetworkSocket::send(Packet& pPacket) {
   pPacket.source(mNodeId.id());
   pPacket.id(mIdCounter++);
+  BT_LOG_INFO_AND_PARAMETER("send mIdCounter ",mIdCounter);
   if (pPacket.destination() == mNodeId.id()) {
      receiveInternal(pPacket);
      return true;
