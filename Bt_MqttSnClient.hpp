@@ -135,7 +135,7 @@ class MqttSnClient
       // Operator= to prohibit copy assignment
       MqttSnClient& operator=(const MqttSnClient&);
 
-      void pollLoop(uint8_t* oBuffer, uint8_t msgType);
+      bool pollLoop(uint8_t* oBuffer, uint8_t msgType);
 
       bool handleLoop(uint8_t* oBuffer, uint8_t msgType);
       bool reveiveLoop(uint8_t* oBuffer);

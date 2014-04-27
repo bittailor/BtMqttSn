@@ -317,7 +317,10 @@ bool MqttSnClient::connect(uint16_t iKeepAliveTimerDuration) {
       return false;
    }
 
-   pollLoop(buffer, CONNACK);
+   if(!pollLoop(buffer, CONNACK)) {
+      BT_LOG_WARNING("wait for CONNACK timeout");
+      return false;
+   }
 
    Connack* connack = reinterpret_cast<Connack*>(buffer);
 
@@ -343,7 +346,10 @@ bool MqttSnClient::disconnect() {
       return false;
    }
 
-   pollLoop(buffer, DISCONNECT);
+   if(!pollLoop(buffer, DISCONNECT)) {
+      BT_LOG_WARNING("wait for DISCONNECT timeout");
+      return false;
+   }
 
    return true;
 
@@ -367,7 +373,10 @@ bool MqttSnClient::registerTopic(const char* iTopic) {
       return false;
    }
 
-   pollLoop(buffer, REGACK);
+   if(!pollLoop(buffer, REGACK)) {
+      BT_LOG_WARNING("wait for REGACK timeout");
+      return false;
+   }
 
    Regack* regack = reinterpret_cast<Regack*>(buffer);
    if(regack->getMsgId() != msgId) {
@@ -450,7 +459,10 @@ bool MqttSnClient::subscribe(const char* iTopic) {
       return false;
    }
 
-   pollLoop(buffer, SUBACK);
+   if(!pollLoop(buffer, SUBACK)) {
+      BT_LOG_WARNING("wait for SUBACK timeout");
+      return false;
+   }
 
    Suback* suback = reinterpret_cast<Suback*>(buffer);
    if (suback->getMsgId() != msgId) {
@@ -498,8 +510,15 @@ void MqttSnClient::loop() {
 
 //-------------------------------------------------------------------------------------------------
 
-void MqttSnClient::pollLoop(uint8_t* oBuffer, uint8_t msgType) {
-   while(!handleLoop(oBuffer, msgType)){}
+bool MqttSnClient::pollLoop(uint8_t* oBuffer, uint8_t msgType) {
+   unsigned long timeout = millis() + BT_MQTTSN_T_RETRY;
+   while(!handleLoop(oBuffer, msgType)){
+      if((BT_MQTTSN_T_RETRY != 0) &&  (millis() > timeout) ) {
+         return false;
+      }
+   }
+
+   return true;
 }
 
 //-------------------------------------------------------------------------------------------------
