@@ -62,7 +62,7 @@ class MqttSnClient
 
             bool define(uint16_t iId, const char* iName) {
                if(strlen(iName) > MAX_LENGTH_TOPIC_NAME) {
-                  BT_LOG_MESSAGE("topic name too long");
+                  BT_LOG_WARNING_AND_PARAMETER("topic name too long: ", iName);
                   return false;
                }
                mRegistered = true;
@@ -90,7 +90,7 @@ class MqttSnClient
             bool add(uint16_t iId, const char* iName) {
                Topic* freeTopic = nextFree();
                if(freeTopic == 0) {
-                  BT_LOG_MESSAGE("no free topic storage");
+                  BT_LOG_WARNING("no free topic storage");
                   return false;
                }
                return freeTopic->define(iId, iName);

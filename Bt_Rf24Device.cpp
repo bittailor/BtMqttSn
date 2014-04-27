@@ -185,7 +185,6 @@ Rf24Device::~Rf24Device() {
 Rf24Device::Status Rf24Device::status()
 {
    uint8_t status = readRegister(*mSpi, REGISTER_STATUS);
-   //BT_LOG_MESSAGE("status = %02x \n",status);
    return Status(status & 0x40, status & 0x20, status & 0x10);
 }
 

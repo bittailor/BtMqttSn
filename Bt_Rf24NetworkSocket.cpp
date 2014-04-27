@@ -78,13 +78,13 @@ void Rf24NetworkSocket::workcycle() {
       Packet packet;
       if (mController->read(packet.mControllerPackage)) {
          if (packet.destination() != mNodeId.id()) {
-            BT_LOG_MESSAGE_AND_PARAMETER(" - route from ",packet.source());
-            BT_LOG_MESSAGE_AND_PARAMETER("         to   ",packet.destination());
+            BT_LOG_INFO_AND_PARAMETER(" - route from ",packet.source());
+            BT_LOG_INFO_AND_PARAMETER("         to   ",packet.destination());
             sendInternal(packet);
             continue;
          }
-         BT_LOG_MESSAGE_AND_PARAMETER(" - receive from ",packet.source());
-         BT_LOG_MESSAGE_AND_PARAMETER("           to   ",packet.destination());
+         BT_LOG_INFO_AND_PARAMETER(" - receive from ",packet.source());
+         BT_LOG_INFO_AND_PARAMETER("           to   ",packet.destination());
          receiveInternal(packet);
       }
    }
@@ -101,7 +101,7 @@ bool Rf24NetworkSocket::sendInternal(Packet& pPacket) {
 void Rf24NetworkSocket::receiveInternal(Packet& pPacket) {
 
    if (mPackets.full()) {
-      BT_LOG_MESSAGE("drop packet");
+      BT_LOG_ERROR("packets full => drop packet");
       return;
    }
 

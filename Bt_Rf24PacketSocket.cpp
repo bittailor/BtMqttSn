@@ -52,7 +52,7 @@ Rf24PacketSocket::~Rf24PacketSocket() {
 
 bool Rf24PacketSocket::send(uint8_t* iPayload, size_t iSize,  uint8_t iNodeId){
    if(iSize > Rf24NetworkSocket::Packet::PAYLOAD_CAPACITY) {
-      BT_LOG_MESSAGE("size to large");
+      BT_LOG_WARNING("size to large");
       return false;
    }
 
@@ -74,7 +74,7 @@ int32_t Rf24PacketSocket::receive(uint8_t* oPayload, size_t iMaxSize, uint8_t* o
    }
 
    if(packet.size() > iMaxSize) {
-      BT_LOG_MESSAGE("max size to small");
+      BT_LOG_WARNING("max size to small");
       return -1;
    }
 

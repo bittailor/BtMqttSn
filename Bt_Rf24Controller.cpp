@@ -74,7 +74,7 @@ size_t Rf24Controller::write(Rf24Pipes::Rf24Pipe pPipe, uint8_t* pData, size_t p
 
    if (status.retransmitsExceeded()) {
       mDevice->clearRetransmitsExceeded();
-      BT_LOG_MESSAGE("TxMode::ToStandbyI: send failed retransmits exceeded ! \n");
+      BT_LOG_WARNING("TxMode::ToStandbyI: send failed retransmits exceeded");
       sentSize = 0;
    }
 
@@ -82,7 +82,7 @@ size_t Rf24Controller::write(Rf24Pipes::Rf24Pipe pPipe, uint8_t* pData, size_t p
    if (timeout) {
       mDevice->clearRetransmitsExceeded();
       mDevice->flushTransmitFifo();
-      BT_LOG_MESSAGE("TxMode::ToStandbyI: send failed timeout ! \n");
+      BT_LOG_WARNING("TxMode::ToStandbyI: send failed timeout");
       sentSize = 0;
    }
 
@@ -244,7 +244,7 @@ void Rf24Controller::StandbyI::ToRxMode() {
 void Rf24Controller::StandbyI::ToTxMode() {
    if (mController->mDevice->isTransmitFifoEmpty())
    {
-      BT_LOG_MESSAGE("StandbyI::ToTxMode: transmit fifo is empty => StandbyI ! \n");
+      BT_LOG_ERROR("StandbyI::ToTxMode: transmit fifo is empty => StandbyI");
       return;
    }
 

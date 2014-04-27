@@ -313,7 +313,7 @@ bool MqttSnClient::connect(uint16_t iKeepAliveTimerDuration) {
    connect->initialize(mClientId, iKeepAliveTimerDuration);
    if (!send(buffer, connect->header.length))
    {
-      BT_LOG_MESSAGE("send Connect failed");
+      BT_LOG_WARNING("send Connect failed");
       return false;
    }
 
@@ -325,7 +325,7 @@ bool MqttSnClient::connect(uint16_t iKeepAliveTimerDuration) {
       return true;
    }
 
-   BT_LOG_MESSAGE_AND_PARAMETER("connect failed with: ", connack->returnCode);
+   BT_LOG_WARNING_AND_PARAMETER("connect failed with: ", connack->returnCode);
 
    return false;
 }
@@ -339,7 +339,7 @@ bool MqttSnClient::disconnect() {
    message->initialize();
    if (!send(buffer, message->header.length))
    {
-      BT_LOG_MESSAGE("send Disconnect failed");
+      BT_LOG_WARNING("send Disconnect failed");
       return false;
    }
 
@@ -353,7 +353,7 @@ bool MqttSnClient::disconnect() {
 
 bool MqttSnClient::registerTopic(const char* iTopic) {
    if (strlen(iTopic) > MAX_LENGTH_TOPIC_NAME) {
-      BT_LOG_MESSAGE("topic name too long");
+      BT_LOG_WARNING("topic name too long");
       return false;
    }
    uint8_t buffer[I_RfPacketSocket::PAYLOAD_CAPACITY+1] = {0};
@@ -363,7 +363,7 @@ bool MqttSnClient::registerTopic(const char* iTopic) {
    message->initialize(msgId, iTopic);
    if (!send(buffer, message->header.length))
    {
-      BT_LOG_MESSAGE("send Register failed");
+      BT_LOG_WARNING("send Register failed");
       return false;
    }
 
@@ -371,23 +371,23 @@ bool MqttSnClient::registerTopic(const char* iTopic) {
 
    Regack* regack = reinterpret_cast<Regack*>(buffer);
    if(regack->getMsgId() != msgId) {
-      BT_LOG_MESSAGE("Regack msgId mismatch");
+      BT_LOG_WARNING("Regack msgId mismatch");
       return false;
    }
 
    if(regack->returnCode != ACCEPTED) {
-      BT_LOG_MESSAGE_AND_PARAMETER("register failed with :", regack->returnCode);
+      BT_LOG_WARNING_AND_PARAMETER("register failed with :", regack->returnCode);
       return false;
    }
 
    if(!mTopics.add(regack->getTopicId(), iTopic)) {
-      BT_LOG_MESSAGE_AND_PARAMETER("failed adding topic id :", regack->getTopicId());
+      BT_LOG_WARNING_AND_PARAMETER("failed adding topic id :", regack->getTopicId());
       return false;
    }
 
-   BT_LOG_MESSAGE("topic registered:");
-   BT_LOG_MESSAGE_AND_PARAMETER("   id    :",regack->getTopicId());
-   BT_LOG_MESSAGE_AND_PARAMETER("   topic :",iTopic);
+   BT_LOG_INFO("topic registered:");
+   BT_LOG_INFO_AND_PARAMETER("   id    :",regack->getTopicId());
+   BT_LOG_INFO_AND_PARAMETER("   topic :",iTopic);
 
    return true;
 }
@@ -403,7 +403,7 @@ bool MqttSnClient::publish(const char* iTopic, const char* iMessage, bool iRetai
 
 bool MqttSnClient::publish(const char* iTopic,const uint8_t* iData, size_t iSize, bool iRetain) {
    if (iSize > MAX_LENGTH_DATA) {
-      BT_LOG_MESSAGE("publish data too long");
+      BT_LOG_WARNING("publish data too long");
       return false;
    }
 
@@ -414,7 +414,7 @@ bool MqttSnClient::publish(const char* iTopic,const uint8_t* iData, size_t iSize
       }
       topic = mTopics.findTopic(iTopic);
       if(topic == 0) {
-         BT_LOG_MESSAGE_AND_PARAMETER("could not find registered topic ", iTopic);
+         BT_LOG_WARNING_AND_PARAMETER("could not find registered topic ", iTopic);
          return false;
       }
    }
@@ -424,7 +424,7 @@ bool MqttSnClient::publish(const char* iTopic,const uint8_t* iData, size_t iSize
    message->initialize(iRetain, topic->id(), iData, iSize);
    if (!send(buffer, message->header.length))
    {
-      BT_LOG_MESSAGE("send Publish failed");
+      BT_LOG_WARNING("send Publish failed");
       return false;
    }
 
@@ -435,7 +435,7 @@ bool MqttSnClient::publish(const char* iTopic,const uint8_t* iData, size_t iSize
 
 bool MqttSnClient::subscribe(const char* iTopic) {
    if (strlen(iTopic) > MAX_LENGTH_TOPIC_NAME) {
-      BT_LOG_MESSAGE("topic name too long");
+      BT_LOG_WARNING("topic name too long");
       return false;
    }
 
@@ -446,7 +446,7 @@ bool MqttSnClient::subscribe(const char* iTopic) {
    message->initialize(msgId, iTopic);
    if (!send(buffer, message->header.length))
    {
-      BT_LOG_MESSAGE("send Subscribe failed");
+      BT_LOG_WARNING("send Subscribe failed");
       return false;
    }
 
@@ -454,25 +454,25 @@ bool MqttSnClient::subscribe(const char* iTopic) {
 
    Suback* suback = reinterpret_cast<Suback*>(buffer);
    if (suback->getMsgId() != msgId) {
-      BT_LOG_MESSAGE("Suback msgId mismatch");
+      BT_LOG_WARNING("Suback msgId mismatch");
       return false;
    }
 
    if (suback->returnCode != ACCEPTED) {
-      BT_LOG_MESSAGE_AND_PARAMETER("subscribe failed with :", suback->returnCode);
+      BT_LOG_WARNING_AND_PARAMETER("subscribe failed with :", suback->returnCode);
       return false;
    }
 
    if (suback->getTopicId() != 0x0000) {
       if (!mTopics.add(suback->getTopicId(), iTopic)) {
-         BT_LOG_MESSAGE_AND_PARAMETER("failed adding topic id :", suback->getTopicId());
+         BT_LOG_WARNING_AND_PARAMETER("failed adding topic id :", suback->getTopicId());
          return false;
       }
    }
 
-   BT_LOG_MESSAGE("topic subscribed:");
-   BT_LOG_MESSAGE_AND_PARAMETER("   id    :",suback->getTopicId());
-   BT_LOG_MESSAGE_AND_PARAMETER("   topic :",iTopic);
+   BT_LOG_INFO("topic subscribed:");
+   BT_LOG_INFO_AND_PARAMETER("   id    :",suback->getTopicId());
+   BT_LOG_INFO_AND_PARAMETER("   topic :",iTopic);
 
    return true;
 }
@@ -491,7 +491,7 @@ void MqttSnClient::loop() {
       message->initialize();
       if (!send(buffer, message->header.length))
       {
-         BT_LOG_MESSAGE("send Pingreq failed");
+         BT_LOG_WARNING("send Pingreq failed");
       }
    }
 }
@@ -529,24 +529,24 @@ bool MqttSnClient::reveiveLoop(uint8_t* oBuffer) {
    uint8_t receiveNodeId;
    int32_t size = mSocket->receive(oBuffer, I_RfPacketSocket::PAYLOAD_CAPACITY, &receiveNodeId);
    if (size < 0) {
-      BT_LOG_MESSAGE("receive failed");
+      BT_LOG_WARNING("receive failed");
       return false;
    }
 
    if (receiveNodeId != mGatewayNodeId) {
-      BT_LOG_MESSAGE("drop not gateway packet");
+      BT_LOG_WARNING("drop not gateway packet");
       return false;
    }
 
    if (size < sizeof(Header)) {
-      BT_LOG_MESSAGE("invalid message size");
+      BT_LOG_WARNING("invalid message size");
       return false;
    }
 
    Header* header = reinterpret_cast<Header*>(oBuffer);
 
    if (size != header->length) {
-      BT_LOG_MESSAGE("size length mismatch");
+      BT_LOG_WARNING("size length mismatch");
       return false;
    }
 
@@ -570,14 +570,14 @@ void MqttSnClient::handleInternal(uint8_t* iBuffer) {
 
 void MqttSnClient::handlePublish(uint8_t* iBuffer) {
    if (mCallback == 0) {
-      BT_LOG_MESSAGE("no callback set => drop message");
+      BT_LOG_WARNING("no callback set => drop message");
       return;
    }
 
    Publish* message = reinterpret_cast<Publish*>(iBuffer);
    const Topic* topic = mTopics.findTopic(message->getTopicId());
    if (topic == 0) {
-      BT_LOG_MESSAGE_AND_PARAMETER("topic id not found: ", message->getTopicId());
+      BT_LOG_WARNING_AND_PARAMETER("topic id not found  => drop message: ", message->getTopicId());
       mCallback("?", reinterpret_cast<char*>(message->data));
       return;
    }
@@ -589,14 +589,14 @@ void MqttSnClient::handlePublish(uint8_t* iBuffer) {
 
 void MqttSnClient::handleRegister(uint8_t* iBuffer) {
    Register* message = reinterpret_cast<Register*>(iBuffer);
-   BT_LOG_MESSAGE("register topic:");
-   BT_LOG_MESSAGE_AND_PARAMETER("   id:   ", message->getTopicId());
-   BT_LOG_MESSAGE_AND_PARAMETER("   name: ", message->topicName);
+   BT_LOG_INFO("register topic:");
+   BT_LOG_INFO_AND_PARAMETER("   id:   ", message->getTopicId());
+   BT_LOG_INFO_AND_PARAMETER("   name: ", message->topicName);
 
    ReturnCode returnCode = ACCEPTED;
 
    if (!mTopics.add(message->getTopicId(), message->topicName)) {
-      BT_LOG_MESSAGE_AND_PARAMETER("failed adding topic id :", message->getTopicId());
+      BT_LOG_WARNING_AND_PARAMETER("failed adding topic id :", message->getTopicId());
       returnCode = REJECTED_NOT_SUPPORTED;
    }
 
@@ -605,7 +605,7 @@ void MqttSnClient::handleRegister(uint8_t* iBuffer) {
    ack->initialize(message->getTopicId(), message->getMsgId(), returnCode);
    if (!send(buffer, ack->header.length))
    {
-      BT_LOG_MESSAGE("send Regack failed");
+      BT_LOG_ERROR("send Regack failed");
    }
 }
 
@@ -617,14 +617,14 @@ void MqttSnClient::handlePingRequest(uint8_t* iBuffer) {
    response->initialize();
    if (!send(buffer, response->header.length))
    {
-      BT_LOG_MESSAGE("send Pingresp failed");
+      BT_LOG_ERROR("send Pingresp failed");
    }
 }
 
 //-------------------------------------------------------------------------------------------------
 
 void MqttSnClient::handlePingResponse(uint8_t* iBuffer) {
-   BT_LOG_MESSAGE("handle PingResponse");
+   BT_LOG_INFO("handle PingResponse");
 }
 
 //-------------------------------------------------------------------------------------------------
