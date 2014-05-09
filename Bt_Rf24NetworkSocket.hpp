@@ -23,7 +23,7 @@ class Rf24NetworkSocket
    private:
       enum { FRAME_BUFFER_SIZE = Rf24Controller::MAX_PAYLOAD_SIZE };
       enum { HEADER_SIZE = 2 };
-      enum { PACKET_STORAGE_SIZE = 6 };
+      enum { PACKET_STORAGE_SIZE = 3 };
 
    public:
 

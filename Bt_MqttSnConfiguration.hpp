@@ -18,7 +18,7 @@
 // configuration
 //-------------------------------------------------------------------------------------------------
 
-#define BT_MQTTSN_MAX_NUMBER_OF_REGISTERED_TOPICS 20
+#define BT_MQTTSN_MAX_NUMBER_OF_REGISTERED_TOPICS 8
 
 #define BT_MQTTSN_T_RETRY 15 * 1000 // 15 seconds ( use 0 to wait forever)
 
