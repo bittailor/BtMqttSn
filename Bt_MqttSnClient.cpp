@@ -291,7 +291,7 @@ MqttSnClient::MqttSnClient(I_RfPacketSocket& iSocket,
                            const char* iClientId,
                            Callback iCallback)
 : mSocket(&iSocket), mGatewayNodeId(iGatewayNodeId), mMsgIdCounter(0), mCallback(iCallback)
-, mKeepAliveTimerDuration(0), mKeepAliveTimerLastSend(millis()) {
+, mKeepAliveTimerDuration(0), mLastSendActivity(millis()), mLastReveiveActivity(millis()), mIsConnected(false) {
    strncpy(mClientId, iClientId, MAX_LENGTH_CLIENT_ID);
 
 }
@@ -306,6 +306,8 @@ MqttSnClient::~MqttSnClient() {
 
 bool MqttSnClient::connect(uint16_t iKeepAliveTimerDuration) {
    mKeepAliveTimerDuration = iKeepAliveTimerDuration * 1000;
+
+   mTopics.clear();
 
    uint8_t buffer[I_RfPacketSocket::PAYLOAD_CAPACITY+1] = {0};
 
@@ -325,6 +327,7 @@ bool MqttSnClient::connect(uint16_t iKeepAliveTimerDuration) {
    Connack* connack = reinterpret_cast<Connack*>(buffer);
 
    if (connack->returnCode == ACCEPTED) {
+      mIsConnected = true;
       return true;
    }
 
@@ -345,6 +348,8 @@ bool MqttSnClient::disconnect() {
       BT_LOG_WARNING("send Disconnect failed");
       return false;
    }
+
+   mIsConnected = false;
 
    if(!pollLoop(buffer, DISCONNECT)) {
       BT_LOG_WARNING("wait for DISCONNECT timeout");
@@ -491,21 +496,36 @@ bool MqttSnClient::subscribe(const char* iTopic) {
 
 //-------------------------------------------------------------------------------------------------
 
-void MqttSnClient::loop() {
+bool MqttSnClient::loop() {
+   if(!mIsConnected) {
+      return false;
+   }
+
    uint8_t buffer[I_RfPacketSocket::PAYLOAD_CAPACITY+1] = {0};
    if(handleLoop(buffer, PUBLISH)) {
       handlePublish(buffer);
    }
 
-   unsigned long timeSinceLastSend = millis() - mKeepAliveTimerLastSend;
-   if(mKeepAliveTimerDuration < timeSinceLastSend) {
+   unsigned long now = millis();
+
+   if (((now - mLastReveiveActivity) > mKeepAliveTimerDuration) || ((now - mLastSendActivity) > mKeepAliveTimerDuration)) {
+      BT_LOG_INFO("send Pingreq ...");
       Pingreq* message = reinterpret_cast<Pingreq*>(buffer);
       message->initialize();
       if (!send(buffer, message->header.length))
       {
          BT_LOG_WARNING("send Pingreq failed");
+         mIsConnected = false;
+         return false;
+      }
+      if(!pollLoop(buffer, PINGRESP)) {
+         BT_LOG_WARNING("wait for PINGRESP timeout");
+         mIsConnected = false;
+         return false;
       }
    }
+
+   return true;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -527,6 +547,8 @@ bool MqttSnClient::handleLoop(uint8_t* oBuffer, uint8_t msgType) {
    if(!reveiveLoop(oBuffer)){
       return false;
    }
+
+   mLastReveiveActivity = millis();
 
    Header* header = reinterpret_cast<Header*>(oBuffer);
 
@@ -649,7 +671,7 @@ void MqttSnClient::handlePingResponse(uint8_t* iBuffer) {
 //-------------------------------------------------------------------------------------------------
 
 bool MqttSnClient::send(uint8_t* iPayload, size_t iSize) {
-   mKeepAliveTimerLastSend = millis();
+   mLastSendActivity = millis();
    return mSocket->send(iPayload, iSize, mGatewayNodeId);
 }
 

@@ -37,7 +37,7 @@ class MqttSnClient
 
       ~MqttSnClient();
 
-      void loop();
+      bool loop();
 
       bool connect(uint16_t iKeepAliveTimerDuration);
       bool disconnect();
@@ -47,13 +47,6 @@ class MqttSnClient
       bool publish(const char* iTopic, const uint8_t* iData, size_t iSize, bool iRetain = false);
       bool subscribe(const char* iTopic);
 
-
-
-
-
-
-
-   
    private:
 
       class Topic {
@@ -69,6 +62,12 @@ class MqttSnClient
                mId = iId;
                strncpy(mName,iName,sizeof(mName));
                return true;
+            }
+
+            void clear() {
+               mRegistered = false;
+               mId = 0;
+               mName[0] = 0;
             }
 
             bool isRegistred() const { return mRegistered; }
@@ -94,6 +93,12 @@ class MqttSnClient
                   return false;
                }
                return freeTopic->define(iId, iName);
+            }
+
+            void clear() {
+               for (size_t i = 0 ; i < BT_MQTTSN_MAX_NUMBER_OF_REGISTERED_TOPICS ; i++) {
+                  mTopics[i].clear();
+               }
             }
 
             const Topic* findTopic(const char* iName) {
@@ -155,7 +160,9 @@ class MqttSnClient
       uint16_t mMsgIdCounter;
       Callback mCallback;
       unsigned long mKeepAliveTimerDuration;
-      unsigned long mKeepAliveTimerLastSend;
+      unsigned long mLastSendActivity;
+      unsigned long mLastReveiveActivity;
+      bool mIsConnected;
 
 };
 

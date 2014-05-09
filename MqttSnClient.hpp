@@ -28,7 +28,7 @@ class MqttSnClient
       void begin(uint8_t iChipEnable, uint8_t iChipSelect,
                  uint8_t iClientNodeId,  uint8_t iGatewayNodeId,
                  const char* iClientId, Callback iCallback = 0);
-      void loop();
+      bool loop();
       void end();
 
       bool connect(uint16_t iKeepAliveTimerDurationInSeconds = 30);
@@ -61,8 +61,8 @@ class MqttSnClient
 // inline forwarding implementation
 //-------------------------------------------------------------------------------------------------
 
-inline void MqttSnClient::loop() {
-   mClient->loop();
+inline bool MqttSnClient::loop() {
+   return mClient->loop();
 }
 
 //-------------------------------------------------------------------------------------------------
