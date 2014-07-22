@@ -9,7 +9,7 @@
 
 using namespace Bt;
 
-#define CHIP_ENABLE 9
+#define PIN_CHIP_ENABLE 9
 #define CHIP_SELECT 10
 #define NODE_ID 2
 
@@ -45,7 +45,7 @@ void setup() {
 }
 
 void loop() {
-   Pin chipEnable(CHIP_ENABLE, Pin::MODE_OUTPUT);
+   Pin chipEnable(PIN_CHIP_ENABLE, Pin::MODE_OUTPUT);
    Pin chipSelect(CHIP_SELECT, Pin::MODE_OUTPUT);
    Spi spi(Spi::BIT_ORDER_MSBFIRST,
            Spi::MODE_0,

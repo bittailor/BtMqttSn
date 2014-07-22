@@ -79,13 +79,13 @@ void Rf24NetworkSocket::workcycle() {
       Packet packet;
       if (mController->read(packet.mControllerPackage)) {
          if (packet.destination() != mNodeId.id()) {
-            BT_LOG_INFO_AND_PARAMETER(" - route from ",packet.source());
-            BT_LOG_INFO_AND_PARAMETER("         to   ",packet.destination());
+            BT_LOG_DEBUG_AND_PARAMETER(" - route from ",packet.source());
+            BT_LOG_DEBUG_AND_PARAMETER("         to   ",packet.destination());
             sendInternal(packet);
             continue;
          }
-         BT_LOG_INFO_AND_PARAMETER(" - receive from ",packet.source());
-         BT_LOG_INFO_AND_PARAMETER("           to   ",packet.destination());
+         BT_LOG_DEBUG_AND_PARAMETER(" - receive from ",packet.source());
+         BT_LOG_DEBUG_AND_PARAMETER("           to   ",packet.destination());
          receiveInternal(packet);
       }
    }
@@ -94,7 +94,18 @@ void Rf24NetworkSocket::workcycle() {
 
 bool Rf24NetworkSocket::sendInternal(Packet& pPacket) {
    Rf24Pipes::Rf24Pipe pipe = mRouting.calculateRoutingPipe(mNodeId, pPacket.destination());
-   return mController->write(pipe, pPacket.mControllerPackage);
+
+   int counter = 0;
+   while(!mController->write(pipe, pPacket.mControllerPackage)) {
+      counter++;
+      if (counter >= 5) {
+         return false;
+      }
+      BT_LOG_WARNING_AND_PARAMETER("send failed do retry ", counter);
+      delayMicroseconds(counter*100);
+   }
+
+   return true;
 }
 
 //-------------------------------------------------------------------------------------------------

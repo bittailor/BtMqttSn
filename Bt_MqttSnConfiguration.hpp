@@ -27,7 +27,8 @@
 #define BT_LOG_LEVEL_NONE    0  // nothing is logged
 #define BT_LOG_LEVEL_ERROR   1  // only errors are logged
 #define BT_LOG_LEVEL_WARNING 2  // errors and warnings are logged
-#define BT_LOG_LEVEL_INFO    3  // everything is logged
+#define BT_LOG_LEVEL_INFO    3  // errors and warnings and info are logged
+#define BT_LOG_LEVEL_DEBUG   4  // everything is logged
 
 // Modify this to change the logging level. Reducing the logging level reduces the code size
 // the strings are removed from the source code.
@@ -45,8 +46,8 @@
 
 #if BT_LOGGING > BT_LOG_LEVEL_NONE
 
-#define BT_LOG_MESSAGE(prefix,message) Serial.print(BT_LOG_STR(prefix)); Serial.println(BT_LOG_STR(message)) ;
-#define BT_LOG_MESSAGE_AND_PARAMETER(prefix,message,parameter) Serial.print(BT_LOG_STR(prefix)); Serial.print(BT_LOG_STR(message)); Serial.println(parameter) ;
+#define BT_LOG_MESSAGE(prefix,message) Serial.print(millis()); Serial.print(BT_LOG_STR(prefix)); Serial.println(BT_LOG_STR(message)) ;
+#define BT_LOG_MESSAGE_AND_PARAMETER(prefix,message,parameter) Serial.print(millis()); Serial.print(BT_LOG_STR(prefix)); Serial.print(BT_LOG_STR(message)); Serial.println(parameter) ;
 
 #else
 
@@ -59,8 +60,8 @@
 // -- BT_LOG_LEVEL_ERROR
 #if BT_LOGGING >= BT_LOG_LEVEL_ERROR
 
-#define BT_LOG_ERROR(message) BT_LOG_MESSAGE("E: ",message)
-#define BT_LOG_ERROR_AND_PARAMETER(message,parameter) BT_LOG_MESSAGE_AND_PARAMETER("E: ",message,parameter)
+#define BT_LOG_ERROR(message) BT_LOG_MESSAGE(" E: ",message)
+#define BT_LOG_ERROR_AND_PARAMETER(message,parameter) BT_LOG_MESSAGE_AND_PARAMETER(" E: ",message,parameter)
 
 #else
 
@@ -72,8 +73,8 @@
 // -- BT_LOG_LEVEL_WARNING
 #if BT_LOGGING >= BT_LOG_LEVEL_WARNING
 
-#define BT_LOG_WARNING(message) BT_LOG_MESSAGE("W: ",message)
-#define BT_LOG_WARNING_AND_PARAMETER(message,parameter) BT_LOG_MESSAGE_AND_PARAMETER("W: ",message,parameter)
+#define BT_LOG_WARNING(message) BT_LOG_MESSAGE(" W: ",message)
+#define BT_LOG_WARNING_AND_PARAMETER(message,parameter) BT_LOG_MESSAGE_AND_PARAMETER(" W: ",message,parameter)
 
 #else
 
@@ -85,13 +86,26 @@
 // -- BT_LOG_LEVEL_INFO
 #if BT_LOGGING >= BT_LOG_LEVEL_INFO
 
-#define BT_LOG_INFO(message) BT_LOG_MESSAGE("I: ", message)
-#define BT_LOG_INFO_AND_PARAMETER(message,parameter) BT_LOG_MESSAGE_AND_PARAMETER("I: ",message,parameter)
+#define BT_LOG_INFO(message) BT_LOG_MESSAGE(" I: ", message)
+#define BT_LOG_INFO_AND_PARAMETER(message,parameter) BT_LOG_MESSAGE_AND_PARAMETER(" I: ",message,parameter)
 
 #else
 
 #define BT_LOG_INFO(message)
 #define BT_LOG_INFO_AND_PARAMETER(message,parameter)
+
+#endif
+
+// -- BT_LOG_LEVEL_DEBUG
+#if BT_LOGGING >= BT_LOG_LEVEL_DEBUG
+
+#define BT_LOG_DEBUG(message) BT_LOG_MESSAGE(" D: ", message)
+#define BT_LOG_DEBUG_AND_PARAMETER(message,parameter) BT_LOG_MESSAGE_AND_PARAMETER(" D: ",message,parameter)
+
+#else
+
+#define BT_LOG_DEBUG(message)
+#define BT_LOG_DEBUG_AND_PARAMETER(message,parameter)
 
 #endif
 

@@ -185,7 +185,7 @@ Rf24Device::~Rf24Device() {
 Rf24Device::Status Rf24Device::status()
 {
    uint8_t status = readRegister(*mSpi, REGISTER_STATUS);
-   return Status(status & 0x40, status & 0x20, status & 0x10);
+   return Status(status);
 }
 
 //-------------------------------------------------------------------------------------------------

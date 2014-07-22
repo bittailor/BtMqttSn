@@ -39,18 +39,21 @@ class Rf24Device
 
       class Status {
          public:
-            Status(bool pDataReady, bool pDataSent, bool pRetransmitsExceeded)
-         : mDataReady(pDataReady), mDataSent(pDataSent), mRetransmitsExceeded(pRetransmitsExceeded)  {}
+            Status(uint8_t iStatus) : mStatus(iStatus) {
 
-            bool dataReady() {return mDataReady;}
-            bool dataSent() {return mDataSent;}
-            bool retransmitsExceeded() {return mRetransmitsExceeded;}
+            }
 
+            bool dataReady() {return mStatus & 0x40;}
+            bool dataSent() {return mStatus & 0x20;}
+            bool retransmitsExceeded() {return mStatus & 0x10;}
+
+            bool receiveFifoEmpty() {return (mStatus & 0x0e) == 0x0e;}
+            bool transmitFifoFull() {return mStatus & 0x01;}
+
+            uint8_t raw() {return mStatus;}
 
          private:
-            bool mDataReady;
-            bool mDataSent;
-            bool mRetransmitsExceeded;
+            uint8_t mStatus;
       };
 
 

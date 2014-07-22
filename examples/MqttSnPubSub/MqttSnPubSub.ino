@@ -18,7 +18,7 @@
 #define PUBLISH_TOPIC "Bt/Ex/PubSub/Out"
 #define SUBSCRIBE_TOPIC "Bt/Ex/PubSub/In"
 
-#define CHIP_ENABLE 9
+#define PIN_CHIP_ENABLE 9
 #define CHIP_SELECT 10
 
 //-----
@@ -34,7 +34,7 @@ void setup() {
    Serial << " - Pup-Topic = " << PUBLISH_TOPIC << endl;
    Serial << " - Sub-Topic = " << SUBSCRIBE_TOPIC << endl;
 
-   client.begin(CHIP_ENABLE, CHIP_SELECT, CLIENT_NODE_ID, GATEWAY_NODE_ID, CLIENT_ID, &subscribeCallback);
+   client.begin(PIN_CHIP_ENABLE, CHIP_SELECT, CLIENT_NODE_ID, GATEWAY_NODE_ID, CLIENT_ID, &subscribeCallback);
 
    Serial << "try connect ..." << endl;
 

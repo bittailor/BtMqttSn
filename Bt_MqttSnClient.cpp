@@ -315,7 +315,7 @@ bool MqttSnClient::connect(uint16_t iKeepAliveTimerDuration) {
    connect->initialize(mClientId, iKeepAliveTimerDuration);
    if (!send(buffer, connect->header.length))
    {
-      BT_LOG_WARNING("send Connect failed");
+      BT_LOG_WARNING("send CONNECT failed");
       return false;
    }
 
@@ -345,7 +345,7 @@ bool MqttSnClient::disconnect() {
    message->initialize();
    if (!send(buffer, message->header.length))
    {
-      BT_LOG_WARNING("send Disconnect failed");
+      BT_LOG_WARNING("send DISCONNECT failed");
       return false;
    }
 
@@ -374,7 +374,7 @@ bool MqttSnClient::registerTopic(const char* iTopic) {
    message->initialize(msgId, iTopic);
    if (!send(buffer, message->header.length))
    {
-      BT_LOG_WARNING("send Register failed");
+      BT_LOG_WARNING("send REGISTER failed");
       return false;
    }
 
@@ -438,7 +438,7 @@ bool MqttSnClient::publish(const char* iTopic,const uint8_t* iData, size_t iSize
    message->initialize(iRetain, topic->id(), iData, iSize);
    if (!send(buffer, message->header.length))
    {
-      BT_LOG_WARNING("send Publish failed");
+      BT_LOG_WARNING("send PUBLISH failed");
       return false;
    }
 
@@ -460,7 +460,7 @@ bool MqttSnClient::subscribe(const char* iTopic) {
    message->initialize(msgId, iTopic);
    if (!send(buffer, message->header.length))
    {
-      BT_LOG_WARNING("send Subscribe failed");
+      BT_LOG_WARNING("send SUBSCRIBE failed");
       return false;
    }
 
@@ -509,12 +509,12 @@ bool MqttSnClient::loop() {
    unsigned long now = millis();
 
    if (((now - mLastReveiveActivity) > mKeepAliveTimerDuration) || ((now - mLastSendActivity) > mKeepAliveTimerDuration)) {
-      BT_LOG_INFO("send Pingreq ...");
+      BT_LOG_INFO("send PINGREQ ...");
       Pingreq* message = reinterpret_cast<Pingreq*>(buffer);
       message->initialize();
       if (!send(buffer, message->header.length))
       {
-         BT_LOG_WARNING("send Pingreq failed");
+         BT_LOG_WARNING("send PINGREQ failed");
          mIsConnected = false;
          return false;
       }
@@ -523,6 +523,7 @@ bool MqttSnClient::loop() {
          mIsConnected = false;
          return false;
       }
+      BT_LOG_INFO(" ... PINGRESP received");
    }
 
    return true;
@@ -600,11 +601,13 @@ bool MqttSnClient::reveiveLoop(uint8_t* oBuffer) {
 void MqttSnClient::handleInternal(uint8_t* iBuffer) {
    Header* header = reinterpret_cast<Header*>(iBuffer);
    switch(header->msgType) {
-      case PUBLISH   : handlePublish(iBuffer);     break;
-      case REGISTER  : handleRegister(iBuffer);    break;
-      case PINGREQ   : handlePingRequest(iBuffer);    break;
-      case PINGRESP  : handlePingResponse(iBuffer);    break;
+      case PUBLISH   : handlePublish(iBuffer);      return;
+      case REGISTER  : handleRegister(iBuffer);     return;
+      case PINGREQ   : handlePingRequest(iBuffer);  return;
+      case PINGRESP  : handlePingResponse(iBuffer); return;
    }
+
+   BT_LOG_WARNING_AND_PARAMETER("drop unexpected/unsupported message of type ", header->msgType);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -646,7 +649,7 @@ void MqttSnClient::handleRegister(uint8_t* iBuffer) {
    ack->initialize(message->getTopicId(), message->getMsgId(), returnCode);
    if (!send(buffer, ack->header.length))
    {
-      BT_LOG_ERROR("send Regack failed");
+      BT_LOG_ERROR("send REGACK failed");
    }
 }
 
@@ -658,7 +661,7 @@ void MqttSnClient::handlePingRequest(uint8_t* iBuffer) {
    response->initialize();
    if (!send(buffer, response->header.length))
    {
-      BT_LOG_ERROR("send Pingresp failed");
+      BT_LOG_ERROR("send PINGRESP failed");
    }
 }
 

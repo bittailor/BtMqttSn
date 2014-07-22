@@ -6,6 +6,7 @@ AR = "/Applications/Arduino.app/Contents/Resources/Java/hardware/tools/avr/bin/a
 CXX_FLAGS = "-Os -finline-functions -Wall -Wno-strict-aliasing -Wno-inline -fpack-struct -fshort-enums -ffunction-sections -fdata-sections -Werror=return-type -mmcu=atmega328p -DF_CPU=16000000UL -DBT_PF_AVR -DARDUINO=100 -DNDEBUG"
 INCLUDES = "-I/Applications/Arduino.app/Contents/Resources/Java/hardware/arduino/cores/arduino -I/Applications/Arduino.app/Contents/Resources/Java/hardware/arduino/variants/standard -I/Applications/Arduino.app/Contents/Resources/Java/libraries/SPI"    
 
+
 TARGET_DIR = 'target'
 
 SRC = FileList['*.cpp']
@@ -21,9 +22,7 @@ SRC.each do |srcfile|
   file objfile => [srcfile, TARGET_DIR] do
     sh "#{CXX} -MMD -MT #{objfile} -MF #{objfile}.d #{CXX_FLAGS} #{INCLUDES} -c #{srcfile} -o #{objfile}" 
   end
-  
   Rake::MakefileLoader.new.load("#{objfile}.d") if File.file?("#{objfile}.d")
-  
 end
  
 file LIB => OBJ do

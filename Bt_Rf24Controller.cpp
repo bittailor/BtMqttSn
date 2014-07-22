@@ -41,8 +41,8 @@ void Rf24Controller::configure(const Configuration& pConfiguration) {
 
 bool Rf24Controller::write(Rf24Pipes::Rf24Pipe pPipe, Packet& pPacket) {
 
-#if BT_LOGGING >= BT_LOG_LEVEL_INFO
-   Serial.print("write: ");
+#if BT_LOGGING >= BT_LOG_LEVEL_DEBUG
+   Serial.print(millis()); Serial.print(" I: write: ");
    for (size_t i = 0 ; i < 3 ; i++) {
       Serial.print(pPacket.buffer()[i]);
       Serial.print(",");
@@ -76,32 +76,34 @@ size_t Rf24Controller::write(Rf24Pipes::Rf24Pipe pPipe, uint8_t* pData, size_t p
    mDevice->receiveAddress(Rf24Pipes::PIPE_0, transmitPipeAddress);
 
    mDevice->writeTransmitPayload(pData, pSize);
+   while(mDevice->isTransmitFifoEmpty()) {
+      BT_LOG_WARNING("transmit FIFO empty after sending payload ==> try again");
+      mDevice->writeTransmitPayload(pData, pSize);
+   }
+
+   Rf24Device::Status status = mDevice->status();
+   if(status.dataSent()) {
+      BT_LOG_ERROR_AND_PARAMETER("status data sent already set before transmit - status ", status.raw());
+   }
 
    mCurrentState->ToTxMode();
 
-   Rf24Device::Status status = mDevice->status();
-
-   unsigned long start = millis();
-   bool timeout = false;
-   while(!(status.dataSent() || status.retransmitsExceeded() || timeout ) ) {
+   status = mDevice->status();
+   while(!(status.dataSent() || status.retransmitsExceeded()) ) {
       status = mDevice->status();
-      delayMicroseconds(10);
-      timeout = (millis() - start) > 10000;
+      BT_LOG_DEBUG_AND_PARAMETER("autoRetransmitCounter ", mDevice->autoRetransmitCounter());
    }
 
+   BT_LOG_INFO_AND_PARAMETER("status after transmit - ", status.raw());
+   BT_LOG_INFO_AND_PARAMETER("retransmit counter after transmit - ", mDevice->autoRetransmitCounter());
+
    size_t sentSize = pSize;
+   bool flushTransmitFifo = false;
 
    if (status.retransmitsExceeded()) {
       mDevice->clearRetransmitsExceeded();
-      mDevice->flushTransmitFifo();
+      flushTransmitFifo = true;
       BT_LOG_WARNING("TxMode::ToStandbyI: send failed retransmits exceeded");
-      sentSize = 0;
-   }
-
-   if (timeout) {
-      mDevice->clearRetransmitsExceeded();
-      mDevice->flushTransmitFifo();
-      BT_LOG_WARNING("TxMode::ToStandbyI: send failed timeout");
       sentSize = 0;
    }
 
@@ -109,9 +111,13 @@ size_t Rf24Controller::write(Rf24Pipes::Rf24Pipe pPipe, uint8_t* pData, size_t p
       mDevice->clearDataSent();
    }
 
+   mCurrentState->ToStandbyI();
+
+   if (flushTransmitFifo) {
+      mDevice->flushTransmitFifo();
+   }
    mDevice->receiveAddress(Rf24Pipes::PIPE_0, backupPipe0);
 
-   mCurrentState->ToStandbyI();
    originalState->ApplyTo(*mCurrentState);
 
    return sentSize;
@@ -191,7 +197,7 @@ void Rf24Controller::configureDevice() {
    mDevice->dynamicPayloadFeatureEnabled(true);
    mDevice->autoRetransmitDelay(0x6);
    mDevice->autoRetransmitCount(0xf);
-   mDevice->channel(80);
+   mDevice->channel(10);
    mDevice->dataRate(Rf24Device::DR_1_MBPS);
 
    for(size_t i = 0; i < Rf24Pipes::NUMBER_OF_PIPES; i++) {
