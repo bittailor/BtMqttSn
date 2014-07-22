@@ -198,7 +198,7 @@ void Rf24Controller::configureDevice() {
    mDevice->autoRetransmitDelay(0x6);
    mDevice->autoRetransmitCount(0xf);
    mDevice->channel(10);
-   mDevice->dataRate(Rf24Device::DR_1_MBPS);
+   mDevice->dataRate(Rf24Device::DR_2_MBPS);
 
    for(size_t i = 0; i < Rf24Pipes::NUMBER_OF_PIPES; i++) {
       Rf24Pipes::Rf24Pipe pipe = Rf24Pipes::ALL_PIPES[i];
