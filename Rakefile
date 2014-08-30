@@ -1,10 +1,10 @@
 require 'rake/clean'
 require 'rake/loaders/makefile'
 
-CXX = "/Applications/Arduino.app/Contents/Resources/Java/hardware/tools/avr/bin/avr-g++"
-AR = "/Applications/Arduino.app/Contents/Resources/Java/hardware/tools/avr/bin/avr-ar"
+CXX = "/Applications/Arduino/1.0/Arduino.app/Contents/Resources/Java/hardware/tools/avr/bin/avr-g++"
+AR = "/Applications/Arduino/1.0/Arduino.app/Contents/Resources/Java/hardware/tools/avr/bin/avr-ar"
 CXX_FLAGS = "-Os -finline-functions -Wall -Wno-strict-aliasing -Wno-inline -fpack-struct -fshort-enums -ffunction-sections -fdata-sections -Werror=return-type -mmcu=atmega328p -DF_CPU=16000000UL -DBT_PF_AVR -DARDUINO=100 -DNDEBUG"
-INCLUDES = "-I/Applications/Arduino.app/Contents/Resources/Java/hardware/arduino/cores/arduino -I/Applications/Arduino.app/Contents/Resources/Java/hardware/arduino/variants/standard -I/Applications/Arduino.app/Contents/Resources/Java/libraries/SPI"    
+INCLUDES = "-I/Applications/Arduino/1.0/Arduino.app/Contents/Resources/Java/hardware/arduino/cores/arduino -I/Applications/Arduino/1.0/Arduino.app/Contents/Resources/Java/hardware/arduino/variants/standard -I/Applications/Arduino/1.0/Arduino.app/Contents/Resources/Java/libraries/SPI"    
 
 
 TARGET_DIR = 'target'

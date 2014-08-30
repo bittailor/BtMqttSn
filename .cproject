@@ -23,17 +23,17 @@
 							<builder arguments="--trace" autoBuildTarget="" command="rake" enableAutoBuild="true" id="cdt.managedbuild.builder.gnu.cross.1554324780" incrementalBuildTarget="" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="cdt.managedbuild.builder.gnu.cross"/>
 							<tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.1291398838" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler">
 								<option id="gnu.c.compiler.option.include.paths.2136407123" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="/Applications/Arduino.app/Contents/Resources/Java/hardware/arduino/variants/standard"/>
-									<listOptionValue builtIn="false" value="/Applications/Arduino.app/Contents/Resources/Java/libraries/SPI"/>
-									<listOptionValue builtIn="false" value="/Applications/Arduino.app/Contents/Resources/Java/hardware/arduino/cores/arduino"/>
+									<listOptionValue builtIn="false" value="/Applications/Arduino/1.0/Arduino.app/Contents/Resources/Java/hardware/arduino/variants/standard"/>
+									<listOptionValue builtIn="false" value="/Applications/Arduino/1.0/Arduino.app/Contents/Resources/Java/hardware/arduino/cores/arduino"/>
+									<listOptionValue builtIn="false" value="/Applications/Arduino/1.0/Arduino.app/Contents/Resources/Java/libraries/SPI"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1584994991" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.cross.cpp.compiler.477085157" name="Cross G++ Compiler" superClass="cdt.managedbuild.tool.gnu.cross.cpp.compiler">
 								<option id="gnu.cpp.compiler.option.include.paths.851772209" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="/Applications/Arduino.app/Contents/Resources/Java/hardware/arduino/variants/standard"/>
-									<listOptionValue builtIn="false" value="/Applications/Arduino.app/Contents/Resources/Java/hardware/arduino/cores/arduino"/>
-									<listOptionValue builtIn="false" value="/Applications/Arduino.app/Contents/Resources/Java/libraries/SPI"/>
+									<listOptionValue builtIn="false" value="/Applications/Arduino/1.0/Arduino.app/Contents/Resources/Java/hardware/arduino/variants/standard"/>
+									<listOptionValue builtIn="false" value="/Applications/Arduino/1.0/Arduino.app/Contents/Resources/Java/libraries/SPI"/>
+									<listOptionValue builtIn="false" value="/Applications/Arduino/1.0/Arduino.app/Contents/Resources/Java/hardware/arduino/cores/arduino"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.923360713" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
@@ -47,9 +47,9 @@
 							<tool id="cdt.managedbuild.tool.gnu.cross.archiver.2008235764" name="Cross GCC Archiver" superClass="cdt.managedbuild.tool.gnu.cross.archiver"/>
 							<tool id="cdt.managedbuild.tool.gnu.cross.assembler.1129378337" name="Cross GCC Assembler" superClass="cdt.managedbuild.tool.gnu.cross.assembler">
 								<option id="gnu.both.asm.option.include.paths.1473348259" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="/Applications/Arduino.app/Contents/Resources/Java/hardware/arduino/variants/standard"/>
-									<listOptionValue builtIn="false" value="/Applications/Arduino.app/Contents/Resources/Java/libraries/SPI"/>
-									<listOptionValue builtIn="false" value="/Applications/Arduino.app/Contents/Resources/Java/hardware/arduino/cores/arduino"/>
+									<listOptionValue builtIn="false" value="/Applications/Arduino/1.0/Arduino.app/Contents/Resources/Java/hardware/arduino/variants/standard"/>
+									<listOptionValue builtIn="false" value="/Applications/Arduino/1.0/Arduino.app/Contents/Resources/Java/hardware/arduino/cores/arduino"/>
+									<listOptionValue builtIn="false" value="/Applications/Arduino/1.0/Arduino.app/Contents/Resources/Java/libraries/SPI"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.2026385373" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
@@ -98,4 +98,5 @@
 			</profile>
 		</scannerConfigBuildInfo>
 	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 </cproject>
