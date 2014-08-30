@@ -96,21 +96,22 @@ class Rf24Controller
 
       void configure(const Configuration& pConfiguration);
 
+      void startListening();
+      void stopListening();
+
+      void suspend();
+      void resume();
+
       bool write(Rf24Pipes::Rf24Pipe pPipe, Packet& pPacket);
 
       size_t write(Rf24Pipes::Rf24Pipe pPipe, uint8_t* pData, size_t pSize);
 
-      void startListening();
-      void stopListening();
       bool isDataAvailable();
       bool read(Packet& pPacket);
       bool read(Packet& pPacket, Rf24Pipes::Rf24Pipe& pPipe);
 
-
       size_t read(uint8_t* pBuffer, size_t pSize);
       size_t read(uint8_t* pBuffer, size_t pSize, Rf24Pipes::Rf24Pipe& pPipe);
-
-
 
 
    private:

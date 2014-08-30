@@ -106,6 +106,9 @@ class Rf24NetworkSocket
       bool receive(Packet& pPacket);
       bool available();
 
+      void suspend();
+      void resume();
+
    private:
 
    	  // Constructor to prohibit copy construction.

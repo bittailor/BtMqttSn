@@ -47,6 +47,10 @@ class MqttSnClient
       bool publish(const char* iTopic, const uint8_t* iData, size_t iSize, bool iRetain = false);
       bool subscribe(const char* iTopic);
 
+      bool sleep(uint16_t iSleepDuration);
+      bool receivePendingMessages();
+      bool wakeUp();
+
    private:
 
       class Topic {

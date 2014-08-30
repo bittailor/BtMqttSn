@@ -72,6 +72,18 @@ bool Rf24NetworkSocket::available() {
 
 //-------------------------------------------------------------------------------------------------
 
+void Rf24NetworkSocket::suspend() {
+   mController->suspend();
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void Rf24NetworkSocket::resume() {
+   mController->resume();
+}
+
+//-------------------------------------------------------------------------------------------------
+
 void Rf24NetworkSocket::workcycle() {
    size_t limiter = 0;
    while (mController->isDataAvailable() && limiter < 3) {

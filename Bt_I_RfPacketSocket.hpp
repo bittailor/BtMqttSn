@@ -27,6 +27,9 @@ class I_RfPacketSocket {
       virtual int32_t receive(uint8_t* oPayload, size_t iMaxSize, uint8_t* oGatewayNodeId) = 0;
       virtual bool available() = 0;
 
+      virtual void suspend() = 0;
+      virtual void resume() = 0;
+
 
 };
 

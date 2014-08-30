@@ -38,6 +38,9 @@ class MqttSnClient
       bool publish(const char* iTopic, const char* iMessage, bool iRetain = false);
       bool subscribe(const char* iTopic);
 
+      bool sleep(uint16_t iSleepDuration);
+      bool receivePendingMessages();
+      bool wakeUp();
 
    private:
    	  // Constructor to prohibit copy construction.
@@ -94,6 +97,28 @@ inline bool MqttSnClient::publish(const char* iTopic, const char* iMessage, bool
 inline bool MqttSnClient::subscribe(const char* iTopic) {
    return mClient->subscribe(iTopic);
 }
+
+//-------------------------------------------------------------------------------------------------
+
+inline bool MqttSnClient::sleep(uint16_t iSleepDuration) {
+   return mClient->sleep(iSleepDuration);
+}
+
+//-------------------------------------------------------------------------------------------------
+
+inline bool MqttSnClient::receivePendingMessages() {
+   return mClient->receivePendingMessages();
+}
+
+//-------------------------------------------------------------------------------------------------
+
+inline bool MqttSnClient::wakeUp() {
+   return mClient->wakeUp();
+}
+
+//-------------------------------------------------------------------------------------------------
+
+
 
 //-------------------------------------------------------------------------------------------------
 

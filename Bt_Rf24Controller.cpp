@@ -39,6 +39,30 @@ void Rf24Controller::configure(const Configuration& pConfiguration) {
 
 //-------------------------------------------------------------------------------------------------
 
+void Rf24Controller::startListening() {
+   mCurrentState->ToRxMode();
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void Rf24Controller::stopListening() {
+   mCurrentState->ToStandbyI();
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void Rf24Controller::suspend() {
+   mCurrentState->ToRxMode();
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void Rf24Controller::resume() {
+   mCurrentState->ToPowerDown();
+}
+
+//-------------------------------------------------------------------------------------------------
+
 bool Rf24Controller::write(Rf24Pipes::Rf24Pipe pPipe, Packet& pPacket) {
 
 #if BT_LOGGING >= BT_LOG_LEVEL_DEBUG
@@ -121,18 +145,6 @@ size_t Rf24Controller::write(Rf24Pipes::Rf24Pipe pPipe, uint8_t* pData, size_t p
    originalState->ApplyTo(*mCurrentState);
 
    return sentSize;
-}
-
-//-------------------------------------------------------------------------------------------------
-
-void Rf24Controller::startListening() {
-   mCurrentState->ToRxMode();
-}
-
-//-------------------------------------------------------------------------------------------------
-
-void Rf24Controller::stopListening() {
-   mCurrentState->ToStandbyI();
 }
 
 //-------------------------------------------------------------------------------------------------

@@ -28,6 +28,9 @@ class Rf24PacketSocket : public I_RfPacketSocket
       virtual int32_t receive(uint8_t* oPayload, size_t iMaxSize, uint8_t* oNodeId);
       virtual bool available();
 
+      virtual void suspend();
+      virtual void resume();
+
    private:
    	  // Constructor to prohibit copy construction.
       Rf24PacketSocket(const Rf24PacketSocket&);

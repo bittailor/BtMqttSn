@@ -91,8 +91,8 @@ struct Connect {
       uint16_t duration;
       char clientId[0];
 
-      void initialize(const char* pClientId, uint16_t iKeepAliveTimerDuration) {
-         header.length = sizeof(Connect) + strlen(pClientId);
+      void initialize(const char* iClientId, uint16_t iKeepAliveTimerDuration) {
+         header.length = sizeof(Connect) + strlen(iClientId);
          header.msgType = CONNECT;
          flags.bits.dup = false;
          flags.bits.qos = 0;
@@ -102,12 +102,12 @@ struct Connect {
          flags.bits.topicIdType = 0;
          protocolId = PROTOCOL_ID_1_2;
          duration = bswap(iKeepAliveTimerDuration);
-         memcpy(clientId, pClientId, strlen(pClientId));
+         memcpy(clientId, iClientId, strlen(iClientId));
 
       }
 
-      void setDuration(uint16_t pDuration) {
-         duration = bswap(pDuration);
+      void setDuration(uint16_t iDuration) {
+         duration = bswap(iDuration);
       }
 
       uint16_t getDuration() {
@@ -251,8 +251,10 @@ struct Disconnect {
          header.msgType = DISCONNECT;
       }
 
-      void setDuration(uint16_t pDuration) {
-         duration = bswap(pDuration);
+      void initialize(uint16_t pDuration) {
+         header.length = 4;
+         header.msgType = DISCONNECT;
+         duration = bswap(duration);
       }
 
       uint16_t getDuration() {
@@ -262,11 +264,19 @@ struct Disconnect {
 
 struct Pingreq {
       Header header;
+      char clientId[0];
 
       void initialize() {
          header.length = 2;
          header.msgType = PINGREQ;
       }
+
+      void initialize(const char* iClientId) {
+         header.length = 2 + strlen(iClientId);
+         header.msgType = PINGREQ;
+         memcpy(clientId, iClientId, strlen(iClientId));
+      }
+
 };
 
 struct Pingresp {
@@ -492,6 +502,86 @@ bool MqttSnClient::subscribe(const char* iTopic) {
    BT_LOG_INFO_AND_PARAMETER("   topic :",iTopic);
 
    return true;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+bool MqttSnClient::sleep(uint16_t iSleepDuration) {
+   uint8_t buffer[I_RfPacketSocket::PAYLOAD_CAPACITY+1] = {0};
+
+   Disconnect* message = reinterpret_cast<Disconnect*>(buffer);
+   message->initialize(iSleepDuration);
+   if (!send(buffer, message->header.length))
+   {
+      BT_LOG_WARNING("send DISCONNECT failed");
+      return false;
+   }
+
+   if(!pollLoop(buffer, DISCONNECT)) {
+      BT_LOG_WARNING("wait for DISCONNECT timeout");
+      return false;
+   }
+
+   mSocket->suspend();
+
+   return true;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+bool MqttSnClient::receivePendingMessages() {
+   mSocket->resume();
+
+   uint8_t buffer[I_RfPacketSocket::PAYLOAD_CAPACITY+1] = {0};
+
+   Pingreq* message = reinterpret_cast<Pingreq*>(buffer);
+   message->initialize(mClientId);
+   if (!send(buffer, message->header.length))
+   {
+      BT_LOG_WARNING("send PINGREQ failed");
+      return false;
+   }
+
+   if(!pollLoop(buffer, PINGRESP)) {
+      BT_LOG_WARNING("wait for PINGRESP timeout");
+      return false;
+   }
+
+   mSocket->suspend();
+   return true;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+bool MqttSnClient::wakeUp() {
+   mSocket->resume();
+
+   mTopics.clear();
+
+   uint8_t buffer[I_RfPacketSocket::PAYLOAD_CAPACITY+1] = {0};
+   Connect* connect = reinterpret_cast<Connect*>(buffer);
+   connect->initialize(mClientId, mKeepAliveTimerDuration/1000);
+   if (!send(buffer, connect->header.length))
+   {
+      BT_LOG_WARNING("send CONNECT failed");
+      return false;
+   }
+
+   if(!pollLoop(buffer, CONNACK)) {
+      BT_LOG_WARNING("wait for CONNACK timeout");
+      return false;
+   }
+
+   Connack* connack = reinterpret_cast<Connack*>(buffer);
+
+   if (connack->returnCode == ACCEPTED) {
+      mIsConnected = true;
+      return true;
+   }
+
+   BT_LOG_WARNING_AND_PARAMETER("connect failed with: ", connack->returnCode);
+
+   return false;
 }
 
 //-------------------------------------------------------------------------------------------------
