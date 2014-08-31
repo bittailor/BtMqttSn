@@ -32,7 +32,7 @@
 
 // Modify this to change the logging level. Reducing the logging level reduces the code size
 // the strings are removed from the source code.
-#define BT_LOGGING BT_LOG_LEVEL_WARNING
+#define BT_LOGGING BT_LOG_LEVEL_NONE
 
 
 

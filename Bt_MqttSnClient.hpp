@@ -23,6 +23,14 @@ class MqttSnClient
 {
    public:
 
+      enum State {
+         DISCONNECTED,
+         ACTIVE,
+         ASLEEP,
+         AWAKE,
+         LOST,
+      };
+
       typedef void (*Callback)(const char* iTopic, const char* iData);
 
 
@@ -137,8 +145,7 @@ class MqttSnClient
             Topic mTopics[BT_MQTTSN_MAX_NUMBER_OF_REGISTERED_TOPICS];
       };
 
-
-        // Constructor to prohibit copy construction.
+      // Constructor to prohibit copy construction.
       MqttSnClient(const MqttSnClient&);
 
       // Operator= to prohibit copy assignment
@@ -157,6 +164,12 @@ class MqttSnClient
 
       bool send(uint8_t* iPayload, size_t iSize);
 
+      void changeState(State iCurrentState) {
+         BT_LOG_INFO_AND_PARAMETER("state change from : ", mCurrentState);
+         BT_LOG_INFO_AND_PARAMETER("             to   : ", iCurrentState);
+         mCurrentState = iCurrentState;
+      }
+
       I_RfPacketSocket* mSocket;
       uint8_t mGatewayNodeId;
       char mClientId[MAX_LENGTH_CLIENT_ID + 1];
@@ -166,7 +179,7 @@ class MqttSnClient
       unsigned long mKeepAliveTimerDuration;
       unsigned long mLastSendActivity;
       unsigned long mLastReveiveActivity;
-      bool mIsConnected;
+      State mCurrentState;
 
 };
 

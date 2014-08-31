@@ -15,19 +15,21 @@
 #include <stdio.h>
 #include <string.h>
 
-//-------------------------------------------------------------------------------------------------
-
 namespace {
+
+//-------------------------------------------------------------------------------------------------
 
 uint16_t inline bswap(const uint16_t iValue) {
     return (iValue << 8) | (iValue >> 8);
 }
 
+//-------------------------------------------------------------------------------------------------
 
 enum ProtocolId {
       PROTOCOL_ID_1_2 = 0x01
 };
 
+//-------------------------------------------------------------------------------------------------
 
 enum  MsgType  {
       ADVERTISE = 0x00,
@@ -59,12 +61,16 @@ enum  MsgType  {
       WILLMSGRESP
 };
 
+//-------------------------------------------------------------------------------------------------
+
 enum ReturnCode {
    ACCEPTED = 0x00,
    REJECTED_CONGESTION,
    REJECTED_INVALID_TOPIC_ID,
    REJECTED_NOT_SUPPORTED,
 };
+
+//-------------------------------------------------------------------------------------------------
 
 union Flags {
       uint8_t byte;
@@ -79,10 +85,14 @@ union Flags {
       } bits;
 };
 
+//-------------------------------------------------------------------------------------------------
+
 struct Header {
       uint8_t length;
       uint8_t msgType;
 };
+
+//-------------------------------------------------------------------------------------------------
 
 struct Connect {
       Header header;
@@ -91,14 +101,14 @@ struct Connect {
       uint16_t duration;
       char clientId[0];
 
-      void initialize(const char* iClientId, uint16_t iKeepAliveTimerDuration) {
+      void initialize(const char* iClientId, uint16_t iKeepAliveTimerDuration, bool iCleanSession = true) {
          header.length = sizeof(Connect) + strlen(iClientId);
          header.msgType = CONNECT;
          flags.bits.dup = false;
          flags.bits.qos = 0;
          flags.bits.retain = false;
          flags.bits.will = false; //TODO (BT) implement support for will topic!
-         flags.bits.cleanSession = true;
+         flags.bits.cleanSession = iCleanSession;
          flags.bits.topicIdType = 0;
          protocolId = PROTOCOL_ID_1_2;
          duration = bswap(iKeepAliveTimerDuration);
@@ -116,10 +126,14 @@ struct Connect {
 
 };
 
+//-------------------------------------------------------------------------------------------------
+
 struct Connack {
       Header header;
       uint8_t returnCode;
 };
+
+//-------------------------------------------------------------------------------------------------
 
 struct Register {
       Header header;
@@ -170,6 +184,8 @@ struct Regack {
 
 };
 
+//-------------------------------------------------------------------------------------------------
+
 struct Publish {
       Header header;
       Flags flags;
@@ -203,6 +219,8 @@ struct Publish {
 
 };
 
+//-------------------------------------------------------------------------------------------------
+
 struct Subscribe {
       Header header;
       Flags flags;
@@ -226,6 +244,8 @@ struct Subscribe {
       }
 };
 
+//-------------------------------------------------------------------------------------------------
+
 struct Suback {
       Header header;
       Flags flags;
@@ -242,6 +262,8 @@ struct Suback {
       }
 };
 
+//-------------------------------------------------------------------------------------------------
+
 struct Disconnect {
       Header header;
       uint16_t duration;
@@ -251,16 +273,18 @@ struct Disconnect {
          header.msgType = DISCONNECT;
       }
 
-      void initialize(uint16_t pDuration) {
+      void initialize(uint16_t iDuration) {
          header.length = 4;
          header.msgType = DISCONNECT;
-         duration = bswap(duration);
+         duration = bswap(iDuration);
       }
 
       uint16_t getDuration() {
          return bswap(duration);
       }
 };
+
+//-------------------------------------------------------------------------------------------------
 
 struct Pingreq {
       Header header;
@@ -279,6 +303,8 @@ struct Pingreq {
 
 };
 
+//-------------------------------------------------------------------------------------------------
+
 struct Pingresp {
       Header header;
 
@@ -287,6 +313,8 @@ struct Pingresp {
          header.msgType = PINGRESP;
       }
 };
+
+//-------------------------------------------------------------------------------------------------
 
 
 } // namespace
@@ -301,7 +329,7 @@ MqttSnClient::MqttSnClient(I_RfPacketSocket& iSocket,
                            const char* iClientId,
                            Callback iCallback)
 : mSocket(&iSocket), mGatewayNodeId(iGatewayNodeId), mMsgIdCounter(0), mCallback(iCallback)
-, mKeepAliveTimerDuration(0), mLastSendActivity(millis()), mLastReveiveActivity(millis()), mIsConnected(false) {
+, mKeepAliveTimerDuration(0), mLastSendActivity(millis()), mLastReveiveActivity(millis()), mCurrentState(DISCONNECTED) {
    strncpy(mClientId, iClientId, MAX_LENGTH_CLIENT_ID);
 
 }
@@ -337,12 +365,12 @@ bool MqttSnClient::connect(uint16_t iKeepAliveTimerDuration) {
    Connack* connack = reinterpret_cast<Connack*>(buffer);
 
    if (connack->returnCode == ACCEPTED) {
-      mIsConnected = true;
+      changeState(ACTIVE);
       return true;
    }
 
+   changeState(DISCONNECTED);
    BT_LOG_WARNING_AND_PARAMETER("connect failed with: ", connack->returnCode);
-
    return false;
 }
 
@@ -359,7 +387,7 @@ bool MqttSnClient::disconnect() {
       return false;
    }
 
-   mIsConnected = false;
+   changeState(DISCONNECTED);
 
    if(!pollLoop(buffer, DISCONNECT)) {
       BT_LOG_WARNING("wait for DISCONNECT timeout");
@@ -433,6 +461,7 @@ bool MqttSnClient::publish(const char* iTopic,const uint8_t* iData, size_t iSize
 
    const Topic* topic = mTopics.findTopic(iTopic);
    if(topic == 0) {
+      BT_LOG_DEBUG_AND_PARAMETER("register topic since not registered yet ", iTopic);
       if (!registerTopic(iTopic)) {
          return false;
       }
@@ -522,6 +551,8 @@ bool MqttSnClient::sleep(uint16_t iSleepDuration) {
       return false;
    }
 
+   changeState(ASLEEP);
+
    mSocket->suspend();
 
    return true;
@@ -542,10 +573,14 @@ bool MqttSnClient::receivePendingMessages() {
       return false;
    }
 
+   changeState(AWAKE);
+
    if(!pollLoop(buffer, PINGRESP)) {
       BT_LOG_WARNING("wait for PINGRESP timeout");
       return false;
    }
+
+   changeState(ASLEEP);
 
    mSocket->suspend();
    return true;
@@ -556,11 +591,9 @@ bool MqttSnClient::receivePendingMessages() {
 bool MqttSnClient::wakeUp() {
    mSocket->resume();
 
-   mTopics.clear();
-
    uint8_t buffer[I_RfPacketSocket::PAYLOAD_CAPACITY+1] = {0};
    Connect* connect = reinterpret_cast<Connect*>(buffer);
-   connect->initialize(mClientId, mKeepAliveTimerDuration/1000);
+   connect->initialize(mClientId, mKeepAliveTimerDuration/1000, false);
    if (!send(buffer, connect->header.length))
    {
       BT_LOG_WARNING("send CONNECT failed");
@@ -575,10 +608,11 @@ bool MqttSnClient::wakeUp() {
    Connack* connack = reinterpret_cast<Connack*>(buffer);
 
    if (connack->returnCode == ACCEPTED) {
-      mIsConnected = true;
+      changeState(ACTIVE);
       return true;
    }
 
+   changeState(DISCONNECTED);
    BT_LOG_WARNING_AND_PARAMETER("connect failed with: ", connack->returnCode);
 
    return false;
@@ -587,7 +621,7 @@ bool MqttSnClient::wakeUp() {
 //-------------------------------------------------------------------------------------------------
 
 bool MqttSnClient::loop() {
-   if(!mIsConnected) {
+   if(mCurrentState == DISCONNECTED || mCurrentState == LOST) {
       return false;
    }
 
@@ -605,12 +639,12 @@ bool MqttSnClient::loop() {
       if (!send(buffer, message->header.length))
       {
          BT_LOG_WARNING("send PINGREQ failed");
-         mIsConnected = false;
+         changeState(LOST);
          return false;
       }
       if(!pollLoop(buffer, PINGRESP)) {
          BT_LOG_WARNING("wait for PINGRESP timeout");
-         mIsConnected = false;
+         changeState(LOST);
          return false;
       }
       BT_LOG_INFO(" ... PINGRESP received");

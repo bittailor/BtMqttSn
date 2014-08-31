@@ -52,13 +52,14 @@ void Rf24Controller::stopListening() {
 //-------------------------------------------------------------------------------------------------
 
 void Rf24Controller::suspend() {
-   mCurrentState->ToRxMode();
+   mCurrentState->ToPowerDown();
+
 }
 
 //-------------------------------------------------------------------------------------------------
 
 void Rf24Controller::resume() {
-   mCurrentState->ToPowerDown();
+   mCurrentState->ToRxMode();
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -66,21 +67,22 @@ void Rf24Controller::resume() {
 bool Rf24Controller::write(Rf24Pipes::Rf24Pipe pPipe, Packet& pPacket) {
 
 #if BT_LOGGING >= BT_LOG_LEVEL_DEBUG
-   Serial.print(millis()); Serial.print(" I: write: ");
-   for (size_t i = 0 ; i < 3 ; i++) {
-      Serial.print(pPacket.buffer()[i]);
-      Serial.print(",");
-   }
+   Serial.print(millis());
+   Serial.print(BT_LOG_STR(" D: send payload of "));
+   Serial.print(pPacket.size());
+   Serial.print(BT_LOG_STR(" with "));
 
    for (size_t i = 0 ; i < pPacket.size() ; i++) {
-      if(isprint((char) pPacket.buffer()[i])) {
-         Serial.print((char) pPacket.buffer()[i]);
-      } else {
-         Serial.print(pPacket.buffer()[i]);
+      int c = pPacket.buffer()[i];
+      Serial.print(c);
+      if (0x20 <= c && c <= 0x7E) {
+         Serial.print(BT_LOG_STR("["));
+         Serial.print(static_cast<char>(c));
+         Serial.print(BT_LOG_STR("]"));
       }
-      Serial.print(",");
+      Serial.print(" ");
    }
-   Serial.println(" end");
+   Serial.println();
 #endif
 
    size_t size = write(pPipe, pPacket.buffer(), pPacket.size());
@@ -115,7 +117,6 @@ size_t Rf24Controller::write(Rf24Pipes::Rf24Pipe pPipe, uint8_t* pData, size_t p
    status = mDevice->status();
    while(!(status.dataSent() || status.retransmitsExceeded()) ) {
       status = mDevice->status();
-      BT_LOG_DEBUG_AND_PARAMETER("autoRetransmitCounter ", mDevice->autoRetransmitCounter());
    }
 
    BT_LOG_INFO_AND_PARAMETER("status after transmit - ", status.raw());
@@ -178,6 +179,26 @@ bool Rf24Controller::read(Packet& pPacket, Rf24Pipes::Rf24Pipe& pPipe) {
    }
    size_t size = mDevice->readReceivePayload(pPipe, pPacket.buffer(), Packet::BUFFER_CAPACITY);
    pPacket.size(size);
+
+#if BT_LOGGING >= BT_LOG_LEVEL_DEBUG
+   Serial.print(millis());
+   Serial.print(BT_LOG_STR(" D: payload received of size "));
+   Serial.print(pPacket.size());
+   Serial.print(BT_LOG_STR(" with "));
+
+   for (size_t i = 0 ; i < pPacket.size() ; i++) {
+      int c = pPacket.buffer()[i];
+      Serial.print(c);
+      if (0x20 <= c && c <= 0x7E) {
+         Serial.print(BT_LOG_STR("["));
+         Serial.print(static_cast<char>(c));
+         Serial.print(BT_LOG_STR("]"));
+      }
+      Serial.print(" ");
+   }
+   Serial.println();
+#endif
+
    if(mDevice->isReceiveFifoEmpty()) {
       mDevice->clearDataReady();
    }
