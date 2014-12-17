@@ -7,9 +7,7 @@ require 'rake/loaders/makefile'
 # CXX_FLAGS = "-Os -finline-functions -Wall -Wno-strict-aliasing -Wno-inline -fpack-struct -fshort-enums -ffunction-sections -fdata-sections -Werror=return-type -mmcu=atmega328p -DF_CPU=16000000UL -DBT_PF_AVR -DARDUINO=100 -DNDEBUG"
 # INCLUDES = "-I#{ARDUINO}/hardware/arduino/cores/arduino -I#{ARDUINO}/hardware/arduino/variants/standard -I#{ARDUINO}/libraries/SPI"    
 
-
-ARDUINO = "/Applications/Arduino/1.5/Arduino.app/Contents/Java"
-            
+ARDUINO = "/Applications/Arduino/1.5/Arduino.app/Contents/Java"            
 CXX = "#{ARDUINO}/hardware/tools/avr/bin/avr-g++"
 AR = "#{ARDUINO}/hardware/tools/avr/bin/avr-ar"
 CXX_FLAGS = "-Os -finline-functions -Wall -Wno-strict-aliasing -Wno-inline -fpack-struct -fshort-enums -ffunction-sections -fdata-sections -Werror=return-type -mmcu=atmega328p -DF_CPU=16000000UL -DBT_PF_AVR -DARDUINO=100 -DNDEBUG"

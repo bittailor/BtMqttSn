@@ -11,6 +11,7 @@ using namespace Bt;
 
 #define PIN_CHIP_ENABLE 9
 #define CHIP_SELECT 10
+#define RF_CHANNEL 10
 #define NODE_ID 2
 
 class PingServer  {
@@ -53,7 +54,7 @@ void loop() {
            chipSelect);
 
    Rf24Device device(spi,chipEnable);
-   Rf24Controller controller(device);
+   Rf24Controller controller(device,RF_CHANNEL);
    Rf24NetworkSocket socket(NODE_ID, controller);
    PingServer pingServer(socket);
 

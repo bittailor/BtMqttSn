@@ -27,7 +27,7 @@ class MqttSnClient
 
       void begin(uint8_t iChipEnable, uint8_t iChipSelect,
                  uint8_t iClientNodeId,  uint8_t iGatewayNodeId,
-                 const char* iClientId, Callback iCallback = 0);
+                 const char* iClientId, uint8_t iChannel, Callback iCallback = 0);
       bool loop();
       void end();
 

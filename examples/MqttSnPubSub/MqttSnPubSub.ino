@@ -20,6 +20,7 @@
 
 #define PIN_CHIP_ENABLE 9
 #define CHIP_SELECT 10
+#define RF_CHANNEL 10
 
 //-----
 
@@ -34,7 +35,7 @@ void setup() {
    Serial << " - Pup-Topic = " << PUBLISH_TOPIC << endl;
    Serial << " - Sub-Topic = " << SUBSCRIBE_TOPIC << endl;
 
-   client.begin(PIN_CHIP_ENABLE, CHIP_SELECT, CLIENT_NODE_ID, GATEWAY_NODE_ID, CLIENT_ID, &subscribeCallback);
+   client.begin(PIN_CHIP_ENABLE, CHIP_SELECT, CLIENT_NODE_ID, GATEWAY_NODE_ID, CLIENT_ID, RF_CHANNEL, &subscribeCallback);
 
    Serial << "try connect ..." << endl;
 

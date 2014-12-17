@@ -91,7 +91,7 @@ class Rf24Controller
 
       enum { MAX_PAYLOAD_SIZE = Rf24Device::MAX_PAYLOAD_SIZE };
 
-      Rf24Controller(Rf24Device& pDevice);
+      Rf24Controller(Rf24Device& pDevice, uint8_t pChannel);
       ~Rf24Controller();
 
       void configure(const Configuration& pConfiguration);
@@ -174,8 +174,9 @@ class Rf24Controller
 
       void configureDevice();
 
-      Configuration mConfiguration;
       Rf24Device* mDevice;
+      uint8_t mChannel;
+      Configuration mConfiguration;
       PowerDown mPowerDown;
       StandbyI mStandbyI;
       RxMode mRxMode;

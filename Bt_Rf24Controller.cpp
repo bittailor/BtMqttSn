@@ -17,8 +17,8 @@ namespace Bt {
 
 //-------------------------------------------------------------------------------------------------
 
-Rf24Controller::Rf24Controller(Rf24Device& pDevice)
-: mDevice(&pDevice), mPowerDown(*this), mStandbyI(*this), mRxMode(*this), mTxMode(*this), mCurrentState(&mPowerDown) {
+Rf24Controller::Rf24Controller(Rf24Device& pDevice, uint8_t pChannel)
+: mDevice(&pDevice), mChannel(pChannel), mPowerDown(*this), mStandbyI(*this), mRxMode(*this), mTxMode(*this), mCurrentState(&mPowerDown) {
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -230,7 +230,7 @@ void Rf24Controller::configureDevice() {
    mDevice->dynamicPayloadFeatureEnabled(true);
    mDevice->autoRetransmitDelay(0x6);
    mDevice->autoRetransmitCount(0xf);
-   mDevice->channel(10);
+   mDevice->channel(mChannel);
    mDevice->dataRate(Rf24Device::DR_2_MBPS);
 
    for(size_t i = 0; i < Rf24Pipes::NUMBER_OF_PIPES; i++) {
