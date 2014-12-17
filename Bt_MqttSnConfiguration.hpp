@@ -32,7 +32,7 @@
 
 // Modify this to change the logging level. Reducing the logging level reduces the code size
 // the strings are removed from the source code.
-#define BT_LOGGING BT_LOG_LEVEL_NONE
+#define BT_LOGGING BT_LOG_LEVEL_WARNING
 
 
 
@@ -40,8 +40,12 @@
 // logging detail stuff
 //-------------------------------------------------------------------------------------------------
 
-#define BT_PROGMEM __attribute__(( section(".progmem.data") ))
-#define BT_PROGMEM_STR(s) (__extension__({static char __c[] BT_PROGMEM = (s); &__c[0];}))
+//#define BT_PROGMEM __attribute__(( section(".progmem.data") ))
+//#define BT_PROGMEM_STR(s) (__extension__({static char __c[] BT_PROGMEM = (s); &__c[0];}))
+//# define PSTR(s)            (__extension__({static char __c[] PROGMEM    = (s); &__c[0];}))
+#define BT_PROGMEM_STR(s) PSTR(s)
+
+
 #define BT_LOG_STR(string_literal) (reinterpret_cast<const __FlashStringHelper *>(BT_PROGMEM_STR(string_literal)))
 
 #if BT_LOGGING > BT_LOG_LEVEL_NONE
