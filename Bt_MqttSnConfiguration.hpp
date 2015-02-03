@@ -18,7 +18,7 @@
 // configuration
 //-------------------------------------------------------------------------------------------------
 
-#define BT_MQTTSN_MAX_NUMBER_OF_REGISTERED_TOPICS 8
+#define BT_MQTTSN_MAX_NUMBER_OF_REGISTERED_TOPICS 12
 
 #define BT_MQTTSN_T_RETRY 15 * 1000 // 15 seconds ( use 0 to wait forever)
 
@@ -32,7 +32,7 @@
 
 // Modify this to change the logging level. Reducing the logging level reduces the code size
 // the strings are removed from the source code.
-#define BT_LOGGING BT_LOG_LEVEL_WARNING
+#define BT_LOGGING BT_LOG_LEVEL_ERROR
 
 
 
