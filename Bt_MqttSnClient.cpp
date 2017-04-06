@@ -76,12 +76,12 @@ union Flags {
       uint8_t byte;
       struct
       {
-            bool dup             : 1;
-            uint8_t qos          : 2;
-            bool retain          : 1;
-            bool will            : 1;
-            bool cleanSession    : 1;
             uint8_t topicIdType  : 2;
+            bool cleanSession    : 1;
+            bool will            : 1;
+            bool retain          : 1;
+            uint8_t qos          : 2;
+            bool dup             : 1;
       } bits;
 };
 
@@ -180,7 +180,6 @@ struct Regack {
       uint16_t getMsgId() {
          return bswap(msgId);
       }
-
 
 };
 
