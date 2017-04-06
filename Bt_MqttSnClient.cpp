@@ -90,7 +90,7 @@ union Flags {
 struct Header {
       uint8_t length;
       uint8_t msgType;
-};
+}__attribute__((packed, aligned(1)));
 
 //-------------------------------------------------------------------------------------------------
 
@@ -124,14 +124,14 @@ struct Connect {
          return bswap(duration);
       }
 
-};
+}__attribute__((packed, aligned(1)));
 
 //-------------------------------------------------------------------------------------------------
 
 struct Connack {
       Header header;
       uint8_t returnCode;
-};
+}__attribute__((packed, aligned(1)));
 
 //-------------------------------------------------------------------------------------------------
 
@@ -157,7 +157,7 @@ struct Register {
          return bswap(msgId);
       }
 
-};
+}__attribute__((packed, aligned(1)));
 
 struct Regack {
       Header header;
@@ -181,7 +181,7 @@ struct Regack {
          return bswap(msgId);
       }
 
-};
+}__attribute__((packed, aligned(1)));
 
 //-------------------------------------------------------------------------------------------------
 
@@ -216,7 +216,7 @@ struct Publish {
       }
 
 
-};
+}__attribute__((packed, aligned(1)));
 
 //-------------------------------------------------------------------------------------------------
 
@@ -241,7 +241,7 @@ struct Subscribe {
          msgId = bswap(iMsgId);
          memcpy(topicName, iTopicName, strlen(iTopicName));
       }
-};
+}__attribute__((packed, aligned(1)));
 
 //-------------------------------------------------------------------------------------------------
 
@@ -259,7 +259,7 @@ struct Suback {
       uint16_t getMsgId() {
          return bswap(msgId);
       }
-};
+}__attribute__((packed, aligned(1)));
 
 //-------------------------------------------------------------------------------------------------
 
@@ -281,7 +281,7 @@ struct Disconnect {
       uint16_t getDuration() {
          return bswap(duration);
       }
-};
+}__attribute__((packed, aligned(1)));
 
 //-------------------------------------------------------------------------------------------------
 
@@ -300,7 +300,7 @@ struct Pingreq {
          memcpy(clientId, iClientId, strlen(iClientId));
       }
 
-};
+}__attribute__((packed, aligned(1)));
 
 //-------------------------------------------------------------------------------------------------
 
@@ -311,7 +311,7 @@ struct Pingresp {
          header.length = 2;
          header.msgType = PINGRESP;
       }
-};
+}__attribute__((packed, aligned(1)));
 
 //-------------------------------------------------------------------------------------------------
 
